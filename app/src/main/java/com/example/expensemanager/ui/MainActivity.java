@@ -19,15 +19,15 @@ public class MainActivity extends AppCompatActivity {
 
     private ExpenseManagerDao dao;
     private TextView tvTotalIncome, tvTotalExpense, tvNetBalance, tvLogsDisplay, tvCategoryBreakdown;
-    private EditText etIncomeAmount, etIncomeSource, etExpenseAmount, etExpenseCategory, etExpenseNote;
-    private CheckBox cbIsOnline;
+    private EditText etAmount, etLabel, etNote;
+    private RadioGroup rgTransactionType;
+    private RadioButton rbIncome;
     private Button btnPickDate;
     private Spinner spTimeFilter;
 
     private List<Income> currentIncomes = new ArrayList<>();
     private List<ExpenseWithSource> currentExpenses = new ArrayList<>();
     
-    // Tracks state variables
     private String selectedTransactionDate;
     private String activeFilterMode = "All Time";
 
@@ -38,37 +38,33 @@ public class MainActivity extends AppCompatActivity {
 
         dao = AppDatabase.getDatabase(this).expenseManagerDao();
 
-        // Bind View Elements
+        // Bind Unified Layout Views
         tvTotalIncome = findViewById(R.id.tvTotalIncome);
         tvTotalExpense = findViewById(R.id.tvTotalExpense);
         tvNetBalance = findViewById(R.id.tvNetBalance);
         tvCategoryBreakdown = findViewById(R.id.tvCategoryBreakdown);
         tvLogsDisplay = findViewById(R.id.tvLogsDisplay);
         
-        etIncomeAmount = findViewById(R.id.etIncomeAmount);
-        etIncomeSource = findViewById(R.id.etIncomeSource);
-        cbIsOnline = findViewById(R.id.cbIsOnline);
+        rgTransactionType = findViewById(R.id.rgTransactionType);
+        rbIncome = findViewById(R.id.rbIncome);
+        etAmount = findViewById(R.id.etAmount);
+        etLabel = findViewById(R.id.etLabel);
+        etNote = findViewById(R.id.etNote);
         
-        etExpenseAmount = findViewById(R.id.etExpenseAmount);
-        etExpenseCategory = findViewById(R.id.etExpenseCategory);
-        etExpenseNote = findViewById(R.id.etExpenseNote);
         btnPickDate = findViewById(R.id.btnPickDate);
         spTimeFilter = findViewById(R.id.spTimeFilter);
+        Button btnSaveTransaction = findViewById(R.id.btnSaveTransaction);
 
-        Button btnSaveIncome = findViewById(R.id.btnSaveIncome);
-        Button btnSaveExpense = findViewById(R.id.btnSaveExpense);
-
-        // Initialize default runtime date to current date system format (YYYY-MM-DD)
+        // Initialize default timestamp format
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         selectedTransactionDate = sdf.format(new Date());
         btnPickDate.setText("Selected Date: " + selectedTransactionDate);
 
-        // Setup drop-down list array structure for period filtration
+        // Setup drop-down array structure for periods
         String[] filters = {"All Time", "Today", "This Month"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, filters);
         spTimeFilter.setAdapter(adapter);
 
-        // Event hooks
         btnPickDate.setOnClickListener(v -> showDatePickerWindow());
         
         spTimeFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -92,8 +88,8 @@ public class MainActivity extends AppCompatActivity {
             calculateSummaryAndRefreshLogs();
         });
 
-        btnSaveIncome.setOnClickListener(v -> saveIncomeToDatabase());
-        btnSaveExpense.setOnClickListener(v -> saveExpenseToDatabase());
+        // Unified Click Listener Save Entry Action
+        btnSaveTransaction.setOnClickListener(v -> handleTransactionProcessing());
     }
 
     private void showDatePickerWindow() {
@@ -108,49 +104,48 @@ public class MainActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 
-    private void saveIncomeToDatabase() {
-        String amountStr = etIncomeAmount.getText().toString().trim();
-        String source = etIncomeSource.getText().toString().trim();
-        if (amountStr.isEmpty() || source.isEmpty()) return;
+    private void handleTransactionProcessing() {
+        String amountStr = etAmount.getText().toString().trim();
+        String labelInput = etLabel.getText().toString().trim();
+        String noteStr = etNote.getText().toString().trim();
 
-        double amount = Double.parseDouble(amountStr);
-        String method = cbIsOnline.isChecked() ? "Online" : "Cash";
-
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            dao.insertIncome(new Income(amount, source, selectedTransactionDate, method));
-        });
-
-        etIncomeAmount.setText("");
-        etIncomeSource.setText("");
-    }
-
-    private void saveExpenseToDatabase() {
-        String amountStr = etExpenseAmount.getText().toString().trim();
-        String category = etExpenseCategory.getText().toString().trim();
-        String note = etExpenseNote.getText().toString().trim();
-        if (amountStr.isEmpty() || category.isEmpty()) return;
-
-        double amount = Double.parseDouble(amountStr);
-
-        Long targetedIncomeId = null;
-        if (!currentIncomes.isEmpty()) {
-            targetedIncomeId = currentIncomes.get(0).id;
+        if (amountStr.isEmpty() || labelInput.isEmpty()) {
+            Toast.makeText(this, "Please enter amount and label details.", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        Long finalTargetedIncomeId = targetedIncomeId;
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            dao.insertExpense(new Expense(amount, category, finalTargetedIncomeId, selectedTransactionDate, note));
-        });
+        double amount = Double.parseDouble(amountStr);
 
-        etExpenseAmount.setText("");
-        etExpenseCategory.setText("");
-        etExpenseNote.setText("");
+        // Branching Execution routing based on selection state
+        if (rbIncome.isChecked()) {
+            // Process as Income
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                dao.insertIncome(new Income(amount, labelInput, selectedTransactionDate, "Online"));
+            });
+        } else {
+            // Process as Expense
+            Long targetedIncomeId = null;
+            if (!currentIncomes.isEmpty()) {
+                targetedIncomeId = currentIncomes.get(0).id; // Automatically links to latest income source
+            }
+
+            Long finalTargetedIncomeId = targetedIncomeId;
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                dao.insertExpense(new Expense(amount, labelInput, finalTargetedIncomeId, selectedTransactionDate, noteStr));
+            });
+        }
+
+        // Wipe selection states clear
+        etAmount.setText("");
+        etLabel.setText("");
+        etNote.setText("");
+        Toast.makeText(this, "Transaction saved successfully!", Toast.LENGTH_SHORT).show();
     }
 
     private void calculateSummaryAndRefreshLogs() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String todayStr = sdf.format(new Date());
-        String currentMonthPrefix = todayStr.substring(0, 7); // Extracts "YYYY-MM"
+        String currentMonthPrefix = todayStr.substring(0, 7);
 
         double totalIncome = 0;
         for (Income inc : currentIncomes) {
@@ -162,32 +157,37 @@ public class MainActivity extends AppCompatActivity {
         double totalExpense = 0;
         Map<String, Double> categoryMap = new HashMap<>();
         StringBuilder logs = new StringBuilder();
-        logs.append("--- Recent Expense Logs ---\n");
+        
+        logs.append("--- Unified Consolidated History Logs ---\n");
 
+        // Add Incomes to history view logs list output display string console
+        for (Income inc : currentIncomes) {
+            if (shouldIncludeInFilter(inc.date, todayStr, currentMonthPrefix)) {
+                logs.append("➕ [").append(inc.date).append("] ")
+                    .append(inc.source).append(": +$").append(inc.amount).append("\n");
+            }
+        }
+
+        // Add Expenses to history view logs list output display string console
         for (ExpenseWithSource exp : currentExpenses) {
             if (shouldIncludeInFilter(exp.expense.date, todayStr, currentMonthPrefix)) {
                 totalExpense += exp.expense.amount;
 
-                // Group mapping logic calculation metrics
                 String cat = exp.expense.category;
                 categoryMap.put(cat, categoryMap.getOrDefault(cat, 0.0) + exp.expense.amount);
 
-                String linkInfo = exp.sourceName != null ? " [Funded by: " + exp.sourceName + "]" : " [Funded by: Unknown]";
-                logs.append("• [").append(exp.expense.date).append("] ")
-                        .append(exp.expense.category).append(": $").append(exp.expense.amount)
-                        .append(linkInfo).append("\n");
+                logs.append("➖ [").append(exp.expense.date).append("] ")
+                    .append(exp.expense.category).append(": -$").append(exp.expense.amount).append("\n");
             }
         }
 
         double netBalance = totalIncome - totalExpense;
 
-        // Render standard calculations
         tvTotalIncome.setText("Total Income: $" + totalIncome);
         tvTotalExpense.setText("Total Expenses: $" + totalExpense);
         tvNetBalance.setText("Net Balance: $" + netBalance);
         tvLogsDisplay.setText(logs.toString());
 
-        // Render Spending Breakdown Calculations
         if (categoryMap.isEmpty()) {
             tvCategoryBreakdown.setText("No expenses for this selected timeframe selection range.");
         } else {
