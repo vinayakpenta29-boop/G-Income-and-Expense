@@ -54,17 +54,63 @@
             android:text="Selected Date: Today"
             android:layout_marginBottom="16dp"/>
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Log Income" android:textStyle="bold" android:layout_marginBottom="8dp"/>
-        <EditText android:id="@+id/etIncomeAmount" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Income Amount" android:inputType="numberDecimal"/>
-        <EditText android:id="@+id/etIncomeSource" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Source (e.g. Salary)"/>
-        <CheckBox android:id="@+id/cbIsOnline" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Is Online Transaction?" android:checked="true"/>
-        <Button android:id="@+id/btnSaveIncome" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Add Income" android:layout_marginBottom="16dp"/>
+        <TextView 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" 
+            android:text="Log New Transaction" 
+            android:textStyle="bold" 
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp"/>
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Log Expense" android:textStyle="bold" android:layout_marginBottom="8dp"/>
-        <EditText android:id="@+id/etExpenseAmount" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Expense Amount" android:inputType="numberDecimal"/>
-        <EditText android:id="@+id/etExpenseCategory" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Category (e.g. Food)"/>
-        <EditText android:id="@+id/etExpenseNote" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Note"/>
-        <Button android:id="@+id/btnSaveExpense" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Add Expense" android:layout_marginBottom="16dp"/>
+        <RadioGroup
+            android:id="@+id/rgTransactionType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+            <RadioButton
+                android:id="@+id/rbIncome"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Income"
+                android:checked="true"/>
+            <RadioButton
+                android:id="@+id/rbExpense"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Expense"/>
+        </RadioGroup>
+
+        <EditText 
+            android:id="@+id/etAmount" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            android:hint="Amount ($)" 
+            android:inputType="numberDecimal"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText 
+            android:id="@+id/etLabel" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            android:hint="Category / Source (e.g., Salary, Food)"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText 
+            android:id="@+id/etNote" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            android:hint="Note / Description (Optional)"
+            android:layout_marginBottom="16dp"/>
+
+        <Button 
+            android:id="@+id/btnSaveTransaction" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            android:text="Save Transaction" 
+            android:layout_marginBottom="24dp"/>
 
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Filtered Transaction History Logs" android:textStyle="bold" android:layout_marginBottom="4dp"/>
         <TextView android:id="@+id/tvLogsDisplay" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="No transactions recorded yet."/>
