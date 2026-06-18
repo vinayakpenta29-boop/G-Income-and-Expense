@@ -12,6 +12,7 @@
         android:orientation="vertical"
         android:padding="24dp">
 
+        <!-- HEADER APP TITLE -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -30,6 +31,7 @@
             android:textSize="14sp"
             android:layout_marginBottom="24dp"/>
 
+        <!-- TIME PERIOD FILTER CONTAINER -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -63,6 +65,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- LUXURY DASHBOARD SUMMARY CARD -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -157,6 +160,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- DATE SELECTOR ACTION BUTTON -->
         <Button
             android:id="@+id/btnPickDate"
             style="@style/Widget.Material3.Button.TonalButton"
@@ -167,6 +171,7 @@
             app:backgroundTint="#E2E8F0"
             android:layout_marginBottom="24dp"/>
 
+        <!-- MAIN TRANSACTION LEDGER CARD -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -325,6 +330,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- TRANSACTION RECENT RUNNING LOG CONSOLE -->
         <TextView 
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content" 
@@ -343,15 +349,13 @@
             app:strokeWidth="1dp"
             app:cardBackgroundColor="@color/card_bg_surface">
             
-            <TextView 
-                android:id="@+id/tvLogsDisplay" 
-                android:layout_width="match_parent" 
-                android:layout_height="wrap_content" 
-                android:padding="20dp"
-                android:text="No transactions recorded yet."
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp"
-                android:lineSpacingMultiplier="1.3"/>
+            <!-- FIX: Swapped legacy flat text logs with modern high-performance layout list engine -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvTransactionHistory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:paddingVertical="8dp"/>
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
