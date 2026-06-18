@@ -4,15 +4,15 @@
     android:viewportWidth="512"
     android:viewportHeight="512">
 
-    <!-- FIX: Full-bleed background rectangle covering 100% of the canvas to destroy the white border padding -->
+    <!-- Premium Full-Bleed Background Layer -->
     <path
         android:fillColor="#0F172A"
         android:pathData="M0,0 h512 v512 h-512 z"/>
 
-    <!-- 1. Rupee Main Vertical Spine -->
+    <!-- 1. Truncated Rupee Vertical Spine (Fixed to remove the bottom-left extension) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M195,150 h32 v220 h-32 z" />
+        android:pathData="M195,150 h32 v110 h-32 z" />
 
     <!-- 2. Rupee Upper Primary Crossbar -->
     <path
@@ -24,12 +24,12 @@
         android:fillColor="#FFFFFF"
         android:pathData="M160,215 h135 v32 h-135 z" />
 
-    <!-- 4. Perfectly Formed Rupee Outer Loop -->
+    <!-- 4. Rupee Outer Loop Arc -->
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M227,182 h50 c18,0 32,14 32,32 c0,18 -14,32 -32,32 h-50 z" />
 
-    <!-- 5. Inner Loop Cutout (Matches Background slate color to create hollow gap) -->
+    <!-- 5. Inner Loop Window Cutout -->
     <path
         android:fillColor="#0F172A"
         android:pathData="M227,198 h42 c10,0 18,7 18,16 c0,9 -8,16 -18,16 h-42 z" />
@@ -37,9 +37,9 @@
     <!-- 6. Bold Geometric Slanted Leg -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M227,246 L302,365 H342 L252,246 Z" />
+        android:pathData="M227,255 L302,370 h40 L252,255 z" />
 
-    <!-- 7. Premium Growth Indicator: Sharp Minimalist Trendline Arrow -->
+    <!-- 7. Premium Fin-tech Growth Indicator: Sharp Minimalist Trendline Arrow -->
     <path
         android:fillColor="#10B981"
         android:pathData="M350,350 L410,290 V312 H430 V250 H368 V270 H390 L330,330 Z" />
