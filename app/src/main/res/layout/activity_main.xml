@@ -104,12 +104,11 @@
                     android:background="#334155" 
                     android:layout_marginBottom="16dp"/>
 
-                <RowLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:weightSum="2"
-                    android:orientation="horizontal"
-                    style="@style/Widget.Material3.CardView.Filled">
+                    android:orientation="horizontal">
                     
                     <LinearLayout
                         android:layout_width="0dp"
@@ -128,7 +127,7 @@
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Total Expenses" android:textColor="#FECDD3" android:textSize="12sp"/>
                         <TextView android:id="@+id/tvTotalExpense" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="₹0.0" android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold"/>
                     </LinearLayout>
-                </RowLayout>
+                </LinearLayout>
 
                 <View 
                     android:layout_width="match_parent" 
@@ -166,7 +165,6 @@
             android:text="Selected Date: Today"
             android:textColor="@color/brand_primary"
             app:backgroundTint="#E2E8F0"
-            app:cardCornerRadius="14dp"
             android:layout_marginBottom="24dp"/>
 
         <com.google.android.material.card.MaterialCardView
@@ -311,7 +309,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/text_dark"
-                        android:inputType="textLongMessage"/>
+                        android:inputType="text"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <Button 
@@ -323,7 +321,6 @@
                     android:textSize="15sp"
                     android:textStyle="bold"
                     app:backgroundTint="@color/brand_primary"
-                    app:cardCornerRadius="12dp"
                     android:visibility="gone"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
