@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -64,6 +65,19 @@ public class MainActivity extends AppCompatActivity {
         rvTransactionHistory.setLayoutManager(new LinearLayoutManager(this));
         transactionAdapter = new TransactionAdapter();
         rvTransactionHistory.setAdapter(transactionAdapter);
+
+        // ATTACH THE LONG PRESS ACTIONS INTERFACE CALLBACK
+        transactionAdapter.setOnTransactionLongClickListener(new TransactionAdapter.OnTransactionLongClickListener() {
+            @Override
+            public void onEditSelected(TransactionItem item) {
+                showEditTransactionDialog(item);
+            }
+
+            @Override
+            public void onDeleteSelected(TransactionItem item) {
+                showDeleteConfirmationDialog(item);
+            }
+        });
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         selectedTransactionDate = sdf.format(new Date());
@@ -209,12 +223,81 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Transaction logged successfully!", Toast.LENGTH_SHORT).show();
     }
 
+    // NEW: Action handler displaying database modification prompts
+    private void showEditTransactionDialog(TransactionItem item) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Edit Transaction Entries");
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(40, 20, 40, 20);
+
+        final EditText inputAmount = new EditText(this);
+        inputAmount.setHint("Amount (₹)");
+        inputAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        inputAmount.setText(String.valueOf(item.getAmount()));
+        layout.addView(inputAmount);
+
+        final EditText inputLabel = new EditText(this);
+        inputLabel.setHint(item.isIncome() ? "Source Name" : "Category Name");
+        inputLabel.setText(item.getTitle());
+        layout.addView(inputLabel);
+
+        builder.setView(layout);
+
+        builder.setPositiveButton("Save Revisions", (dialog, which) -> {
+            String amtStr = inputAmount.getText().toString().trim();
+            String lblStr = inputLabel.getText().toString().trim();
+            
+            if(amtStr.isEmpty() || lblStr.isEmpty()) return;
+            double amount = Double.parseDouble(amtStr);
+
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                if (item.isIncome()) {
+                    Income updatedIncome = new Income(amount, lblStr, item.getDate(), "Online");
+                    updatedIncome.id = item.getId();
+                    dao.updateIncome(updatedIncome);
+                } else {
+                    Expense updatedExpense = new Expense(amount, lblStr, item.getLinkedSourceId(), item.getDate(), item.getNote());
+                    updatedExpense.id = item.getId();
+                    dao.updateExpense(updatedExpense);
+                }
+            });
+            Toast.makeText(MainActivity.this, "Transaction updated!", Toast.LENGTH_SHORT).show();
+        });
+
+        builder.setNegativeButton("Cancel Actions", (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
+
+    // NEW: Action handler displaying database removal prompts
+    private void showDeleteConfirmationDialog(TransactionItem item) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Transaction")
+                .setMessage("Are you sure you want to permanently erase this transaction record entry?")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    AppDatabase.databaseWriteExecutor.execute(() -> {
+                        if (item.isIncome()) {
+                            Income targetIncome = new Income(0,"","","");
+                            targetIncome.id = item.getId();
+                            dao.deleteIncome(targetIncome);
+                        } else {
+                            Expense targetExpense = new Expense(0,"",null,"","");
+                            targetExpense.id = item.getId();
+                            dao.deleteExpense(targetExpense);
+                        }
+                    });
+                    Toast.makeText(MainActivity.this, "Transaction permanently removed.", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
     private void calculateSummaryAndRefreshLogs() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String todayStr = sdf.format(new Date());
         String currentMonthPrefix = todayStr.substring(0, 7);
 
-        // 1. CALCULATE REAL-TIME BALANCE MATRICES ACROSS ALL INDIVIDUAL SOURCES
         Map<Long, Double> sourceBalanceMap = new HashMap<>();
         for (Income inc : currentIncomes) {
             sourceBalanceMap.put(inc.id, inc.amount);
@@ -232,9 +315,10 @@ public class MainActivity extends AppCompatActivity {
         for (Income inc : currentIncomes) {
             if (shouldIncludeInFilter(inc.date, todayStr, currentMonthPrefix)) {
                 totalIncome += inc.amount;
+                // Updated: Added database table entity id reference
                 aggregatedItems.add(new TransactionItem(
-                    inc.source, inc.date, inc.amount, true, 
-                    "Added directly into balance pools.", null, 0.0
+                    inc.id, inc.source, inc.date, inc.amount, true, 
+                    "Added directly into balance pools.", null, null, 0.0
                 ));
             }
         }
@@ -255,13 +339,16 @@ public class MainActivity extends AppCompatActivity {
                     availableSrcBal = sourceBalanceMap.get(exp.expense.incomeSourceId);
                 }
 
+                // Updated: Added database entity id and tracking references
                 aggregatedItems.add(new TransactionItem(
+                    exp.expense.id, 
                     exp.expense.category, 
                     exp.expense.date, 
                     exp.expense.amount, 
                     false, 
                     exp.expense.note, 
                     srcName, 
+                    exp.expense.incomeSourceId,
                     availableSrcBal
                 ));
             }
