@@ -4,44 +4,32 @@
     android:viewportWidth="512"
     android:viewportHeight="512">
 
-    <!-- Premium Full-Bleed Background Layer -->
+    <!-- Premium Full-Bleed Background Canvas (Eliminates White Borders Completely) -->
     <path
         android:fillColor="#0F172A"
         android:pathData="M0,0 h512 v512 h-512 z"/>
 
-    <!-- 1. Truncated Rupee Vertical Spine (Fixed to remove the bottom-left extension) -->
+    <!-- Dynamic Graphic Layer: Premium Floating Isometric Vault Prism -->
+    
+    <!-- 1. Top Core Cap Plate (Pure White - Symbolizes Net Balance Pool) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M195,150 h32 v110 h-32 z" />
+        android:pathData="M256,140 L370,205 L256,270 L142,205 Z" />
 
-    <!-- 2. Rupee Upper Primary Crossbar -->
+    <!-- 2. Left Side Facet Wall (Muted Brand Slate - Symbolizes Expense Ledgers) -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M160,150 h170 v32 h-170 z" />
+        android:fillColor="#475569"
+        android:pathData="M142,205 L256,270 v125 L142,340 Z" />
 
-    <!-- 3. Rupee Middle Secondary Crossbar -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M160,215 h135 v32 h-135 z" />
-
-    <!-- 4. Rupee Outer Loop Arc -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M227,182 h50 c18,0 32,14 32,32 c0,18 -14,32 -32,32 h-50 z" />
-
-    <!-- 5. Inner Loop Window Cutout -->
-    <path
-        android:fillColor="#0F172A"
-        android:pathData="M227,198 h42 c10,0 18,7 18,16 c0,9 -8,16 -18,16 h-42 z" />
-
-    <!-- 6. Bold Geometric Slanted Leg -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M227,255 L302,370 h40 L252,255 z" />
-
-    <!-- 7. Premium Fin-tech Growth Indicator: Sharp Minimalist Trendline Arrow -->
+    <!-- 3. Right Side Growth Facet Wall (Emerald Green - Symbolizes Incoming Streams) -->
     <path
         android:fillColor="#10B981"
-        android:pathData="M350,350 L410,290 V312 H430 V250 H368 V270 H390 L330,330 Z" />
+        android:pathData="M256,270 L370,205 v125 L256,395 Z" />
+
+    <!-- 4. Subtle Clean Highlight Overlay (Adds a premium glass-like reflection line) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:alpha="0.15"
+        android:pathData="M256,140 L370,205 L350,215 L256,162 Z" />
 
 </vector>
