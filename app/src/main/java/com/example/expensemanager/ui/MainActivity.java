@@ -5,11 +5,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.example.expensemanager.R;
 import com.example.expensemanager.data.AppDatabase;
 import com.example.expensemanager.data.Expense;
 import com.example.expensemanager.data.ExpenseWithSource;
 import com.example.expensemanager.data.Income;
+import com.example.expensemanager.data.TransactionItem;
 import com.example.expensemanager.data.ExpenseManagerDao;
 
 import java.text.SimpleDateFormat;
@@ -18,11 +21,15 @@ import java.util.*;
 public class MainActivity extends AppCompatActivity {
 
     private ExpenseManagerDao dao;
-    private TextView tvTotalIncome, tvTotalExpense, tvNetBalance, tvLogsDisplay, tvCategoryBreakdown;
+    private TextView tvTotalIncome, tvTotalExpense, tvNetBalance, tvCategoryBreakdown;
     private EditText etAmount, etSourceInput, etCategoryInput, etNote;
     private Spinner spTransactionType, spIncomeSources, spTimeFilter;
     private LinearLayout layoutExpenseSourceSelection;
     private Button btnPickDate, btnSaveTransaction;
+
+    // List view architecture components
+    private RecyclerView rvTransactionHistory;
+    private TransactionAdapter transactionAdapter;
 
     private List<Income> currentIncomes = new ArrayList<>();
     private List<ExpenseWithSource> currentExpenses = new ArrayList<>();
@@ -37,12 +44,11 @@ public class MainActivity extends AppCompatActivity {
 
         dao = AppDatabase.getDatabase(this).expenseManagerDao();
 
-        // Bind View Components
+        // Bind layouts
         tvTotalIncome = findViewById(R.id.tvTotalIncome);
         tvTotalExpense = findViewById(R.id.tvTotalExpense);
         tvNetBalance = findViewById(R.id.tvNetBalance);
         tvCategoryBreakdown = findViewById(R.id.tvCategoryBreakdown);
-        tvLogsDisplay = findViewById(R.id.tvLogsDisplay);
         
         spTransactionType = findViewById(R.id.spTransactionType);
         etAmount = findViewById(R.id.etAmount);
@@ -56,17 +62,21 @@ public class MainActivity extends AppCompatActivity {
         spTimeFilter = findViewById(R.id.spTimeFilter);
         btnSaveTransaction = findViewById(R.id.btnSaveTransaction);
 
-        // Date Initializations
+        // INITIALIZE RECYCLERVIEW ENGINE
+        rvTransactionHistory = findViewById(R.id.rvTransactionHistory);
+        rvTransactionHistory.setLayoutManager(new LinearLayoutManager(this));
+        transactionAdapter = new TransactionAdapter();
+        rvTransactionHistory.setAdapter(transactionAdapter);
+
+        // Date Configuration
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         selectedTransactionDate = sdf.format(new Date());
         btnPickDate.setText("Selected Date: " + selectedTransactionDate);
 
-        // Setup Main Time Period Filter Spinner
         String[] timeFilters = {"All Time", "Today", "This Month"};
         ArrayAdapter<String> timeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, timeFilters);
         spTimeFilter.setAdapter(timeAdapter);
 
-        // Setup Transaction Type Selector with standard default placeholder
         String[] types = {"--Select--", "Income", "Expense"};
         ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, types);
         spTransactionType.setAdapter(typeAdapter);
@@ -83,33 +93,31 @@ public class MainActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        // Form fields toggle logic based on selection state
         spTransactionType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedType = types[position];
                 if (selectedType.equals("Income")) {
-                    etAmount.setVisibility(View.VISIBLE);
-                    etSourceInput.setVisibility(View.VISIBLE);
+                    findViewById(R.id.inputLayoutAmount).setVisibility(View.VISIBLE);
+                    findViewById(R.id.inputLayoutSource).setVisibility(View.VISIBLE);
                     layoutExpenseSourceSelection.setVisibility(View.GONE);
-                    etCategoryInput.setVisibility(View.GONE);
-                    etNote.setVisibility(View.VISIBLE);
+                    findViewById(R.id.inputLayoutCategory).setVisibility(View.GONE);
+                    findViewById(R.id.inputLayoutNote).setVisibility(View.VISIBLE);
                     btnSaveTransaction.setVisibility(View.VISIBLE);
                 } else if (selectedType.equals("Expense")) {
-                    etAmount.setVisibility(View.VISIBLE);
-                    etSourceInput.setVisibility(View.GONE);
+                    findViewById(R.id.inputLayoutAmount).setVisibility(View.VISIBLE);
+                    findViewById(R.id.inputLayoutSource).setVisibility(View.GONE);
                     layoutExpenseSourceSelection.setVisibility(View.VISIBLE);
-                    etCategoryInput.setVisibility(View.VISIBLE);
-                    etNote.setVisibility(View.VISIBLE);
+                    findViewById(R.id.inputLayoutCategory).setVisibility(View.VISIBLE);
+                    findViewById(R.id.inputLayoutNote).setVisibility(View.VISIBLE);
                     btnSaveTransaction.setVisibility(View.VISIBLE);
-                    populateIncomeSourceSpinner(); // Refresh targets
+                    populateIncomeSourceSpinner();
                 } else {
-                    // "--Select--" configuration state resets form layout views
-                    etAmount.setVisibility(View.GONE);
-                    etSourceInput.setVisibility(View.GONE);
+                    findViewById(R.id.inputLayoutAmount).setVisibility(View.GONE);
+                    findViewById(R.id.inputLayoutSource).setVisibility(View.GONE);
                     layoutExpenseSourceSelection.setVisibility(View.GONE);
-                    etCategoryInput.setVisibility(View.GONE);
-                    etNote.setVisibility(View.GONE);
+                    findViewById(R.id.inputLayoutCategory).setVisibility(View.GONE);
+                    findViewById(R.id.inputLayoutNote).setVisibility(View.GONE);
                     btnSaveTransaction.setVisibility(View.GONE);
                 }
             }
@@ -117,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        // Database Pipelines Observers
         dao.getAllIncome().observe(this, incomes -> {
             currentIncomes = incomes;
             if (spTransactionType.getSelectedItem().toString().equals("Expense")) {
@@ -149,11 +156,9 @@ public class MainActivity extends AppCompatActivity {
     private void populateIncomeSourceSpinner() {
         List<String> sourceOptions = new ArrayList<>();
         sourceOptions.add("--Select Source--");
-        
         for (Income inc : currentIncomes) {
             sourceOptions.add(inc.source + " (₹" + inc.amount + ")");
         }
-
         ArrayAdapter<String> sourceAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, sourceOptions);
         spIncomeSources.setAdapter(sourceAdapter);
     }
@@ -176,16 +181,14 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Please enter an income source.", Toast.LENGTH_SHORT).show();
                 return;
             }
-
             AppDatabase.databaseWriteExecutor.execute(() -> {
                 dao.insertIncome(new Income(amount, sourceName, selectedTransactionDate, "Online"));
             });
-
         } else if (transactionType.equals("Expense")) {
             int selectedSourceIndex = spIncomeSources.getSelectedItemPosition();
             String categoryName = etCategoryInput.getText().toString().trim();
 
-            if (selectedSourceIndex == 0) { // Points to "--Select Source--"
+            if (selectedSourceIndex == 0) {
                 Toast.makeText(this, "Please select an active funding income source.", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -194,7 +197,6 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            // Maps index choice minus placeholder header directly to local list structure array elements
             Income correspondingIncome = currentIncomes.get(selectedSourceIndex - 1);
             long linkedIncomeId = correspondingIncome.id;
 
@@ -203,12 +205,11 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        // Clean input fields and reset view components
         etAmount.setText("");
         etSourceInput.setText("");
         etCategoryInput.setText("");
         etNote.setText("");
-        spTransactionType.setSelection(0); // Return view states safely back to placeholder defaults
+        spTransactionType.setSelection(0);
         Toast.makeText(this, "Transaction logged successfully!", Toast.LENGTH_SHORT).show();
     }
 
@@ -218,27 +219,19 @@ public class MainActivity extends AppCompatActivity {
         String currentMonthPrefix = todayStr.substring(0, 7);
 
         double totalIncome = 0;
+        List<TransactionItem> aggregatedItems = new ArrayList<>();
+
         for (Income inc : currentIncomes) {
             if (shouldIncludeInFilter(inc.date, todayStr, currentMonthPrefix)) {
                 totalIncome += inc.amount;
+                // Add Income details directly to our unified display model list
+                aggregatedItems.add(new TransactionItem(inc.source, inc.date, inc.amount, true));
             }
         }
 
         double totalExpense = 0;
         Map<String, Double> categoryMap = new HashMap<>();
-        StringBuilder logs = new StringBuilder();
-        
-        logs.append("--- Unified Consolidated History Logs ---\n");
 
-        // Formats income entries to show the income source name
-        for (Income inc : currentIncomes) {
-            if (shouldIncludeInFilter(inc.date, todayStr, currentMonthPrefix)) {
-                logs.append("➕ [").append(inc.date).append("] ")
-                    .append(inc.source).append(": +₹").append(inc.amount).append("\n");
-            }
-        }
-
-        // Formats expense entries to show the expense category name
         for (ExpenseWithSource exp : currentExpenses) {
             if (shouldIncludeInFilter(exp.expense.date, todayStr, currentMonthPrefix)) {
                 totalExpense += exp.expense.amount;
@@ -246,18 +239,22 @@ public class MainActivity extends AppCompatActivity {
                 String cat = exp.expense.category;
                 categoryMap.put(cat, categoryMap.getOrDefault(cat, 0.0) + exp.expense.amount);
 
-                logs.append("➖ [").append(exp.expense.date).append("] ")
-                    .append(exp.expense.category).append(": -₹").append(exp.expense.amount).append("\n");
+                // Add Expense details directly to our unified display model list
+                aggregatedItems.add(new TransactionItem(exp.expense.category, exp.expense.date, exp.expense.amount, false));
             }
         }
 
+        // Sort items chronologically by date string descending
+        Collections.sort(aggregatedItems, (item1, item2) -> item2.getDate().compareTo(item1.getDate()));
+
+        // Push the formatted lists directly into our adapter engine
+        transactionAdapter.updateData(aggregatedItems);
+
         double netBalance = totalIncome - totalExpense;
 
-        // Render calculations using the Indian Rupee symbol
-        tvTotalIncome.setText("Total Income: ₹" + totalIncome);
-        tvTotalExpense.setText("Total Expenses: ₹" + totalExpense);
-        tvNetBalance.setText("Net Balance: ₹" + netBalance);
-        tvLogsDisplay.setText(logs.toString());
+        tvTotalIncome.setText("₹" + totalIncome);
+        tvTotalExpense.setText("₹" + totalExpense);
+        tvNetBalance.setText("₹" + netBalance);
 
         if (categoryMap.isEmpty()) {
             tvCategoryBreakdown.setText("No expenses for this selected timeframe range.");
