@@ -4,32 +4,48 @@
     android:viewportWidth="512"
     android:viewportHeight="512">
 
-    <!-- Premium Full-Bleed Background Canvas (Eliminates White Borders Completely) -->
+    <!-- Premium Full-Bleed Background Layer (Eliminates Launcher White Borders Completely) -->
     <path
         android:fillColor="#0F172A"
         android:pathData="M0,0 h512 v512 h-512 z"/>
 
-    <!-- Dynamic Graphic Layer: Premium Floating Isometric Vault Prism -->
-    
-    <!-- 1. Top Core Cap Plate (Pure White - Symbolizes Net Balance Pool) -->
+    <!-- ==================== AUTHENTIC RUPEE SYMBOL (WHITE) ==================== -->
+
+    <!-- 1. Top Primary Horizontal Crossbar -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M256,140 L370,205 L256,270 L142,205 Z" />
+        android:pathData="M160,140 h192 v28 h-192 z" />
 
-    <!-- 2. Left Side Facet Wall (Muted Brand Slate - Symbolizes Expense Ledgers) -->
+    <!-- 2. Middle Secondary Horizontal Crossbar -->
     <path
-        android:fillColor="#475569"
-        android:pathData="M142,205 L256,270 v125 L142,340 Z" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M160,198 h142 v28 h-142 z" />
 
-    <!-- 3. Right Side Growth Facet Wall (Emerald Green - Symbolizes Incoming Streams) -->
+    <!-- 3. Short Left Spine Connector (Truncated: Stops at the middle bar) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M200,168 h28 v58 h-28 z" />
+
+    <!-- 4. Perfectly Rounded Outer Loop Arc -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M228,168 h44 c32,0 58,26 58,58 c0,32 -26,58 -58,58 h-44 z" />
+
+    <!-- 5. Inner Loop Window Cutout (Matches background to create a crisp hollow frame) -->
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M228,198 h44 c16,0 28,12 28,28 c0,16 -12,28 -28,28 h-44 z" />
+
+    <!-- 6. Geometric Slanted Right Leg -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M228,284 L310,390 h36 L256,284 z" />
+
+    <!-- ==================== FIN-TECH GROWTH ARROW (EMERALD) ==================== -->
+    
+    <!-- 7. Sharp Minimalist Upward Trendline Arrow Polygon -->
     <path
         android:fillColor="#10B981"
-        android:pathData="M256,270 L370,205 v125 L256,395 Z" />
-
-    <!-- 4. Subtle Clean Highlight Overlay (Adds a premium glass-like reflection line) -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:alpha="0.15"
-        android:pathData="M256,140 L370,205 L350,215 L256,162 Z" />
+        android:pathData="M330,360 L410,280 V305 H430 V240 H365 V260 H390 L310,340 Z" />
 
 </vector>
