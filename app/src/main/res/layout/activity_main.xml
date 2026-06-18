@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:text="Expense Manager"
             android:textColor="@color/text_dark"
-            android:textSize="28sp"
+            android:textSize="14sp"
             android:textStyle="bold"
             android:letterSpacing="-0.02"
             android:layout_marginBottom="4dp"/>
@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:text="Track your financial balance effortlessly"
             android:textColor="@color/text_muted"
-            android:textSize="14sp"
+            android:textSize="7sp"
             android:layout_marginBottom="24dp"/>
 
         <!-- TIME PERIOD FILTER CONTAINER -->
