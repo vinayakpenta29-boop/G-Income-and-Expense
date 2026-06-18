@@ -27,7 +27,6 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout layoutExpenseSourceSelection;
     private Button btnPickDate, btnSaveTransaction;
 
-    // List view architecture components
     private RecyclerView rvTransactionHistory;
     private TransactionAdapter transactionAdapter;
 
@@ -44,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
 
         dao = AppDatabase.getDatabase(this).expenseManagerDao();
 
-        // Bind layouts
         tvTotalIncome = findViewById(R.id.tvTotalIncome);
         tvTotalExpense = findViewById(R.id.tvTotalExpense);
         tvNetBalance = findViewById(R.id.tvNetBalance);
@@ -62,13 +60,11 @@ public class MainActivity extends AppCompatActivity {
         spTimeFilter = findViewById(R.id.spTimeFilter);
         btnSaveTransaction = findViewById(R.id.btnSaveTransaction);
 
-        // INITIALIZE RECYCLERVIEW ENGINE
         rvTransactionHistory = findViewById(R.id.rvTransactionHistory);
         rvTransactionHistory.setLayoutManager(new LinearLayoutManager(this));
         transactionAdapter = new TransactionAdapter();
         rvTransactionHistory.setAdapter(transactionAdapter);
 
-        // Date Configuration
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         selectedTransactionDate = sdf.format(new Date());
         btnPickDate.setText("Selected Date: " + selectedTransactionDate);
@@ -218,14 +214,28 @@ public class MainActivity extends AppCompatActivity {
         String todayStr = sdf.format(new Date());
         String currentMonthPrefix = todayStr.substring(0, 7);
 
+        // 1. CALCULATE REAL-TIME BALANCE MATRICES ACROSS ALL INDIVIDUAL SOURCES
+        Map<Long, Double> sourceBalanceMap = new HashMap<>();
+        for (Income inc : currentIncomes) {
+            sourceBalanceMap.put(inc.id, inc.amount);
+        }
+        for (ExpenseWithSource exp : currentExpenses) {
+            if (exp.expense.incomeSourceId != null && sourceBalanceMap.containsKey(exp.expense.incomeSourceId)) {
+                double currentBal = sourceBalanceMap.get(exp.expense.incomeSourceId);
+                sourceBalanceMap.put(exp.expense.incomeSourceId, currentBal - exp.expense.amount);
+            }
+        }
+
         double totalIncome = 0;
         List<TransactionItem> aggregatedItems = new ArrayList<>();
 
         for (Income inc : currentIncomes) {
             if (shouldIncludeInFilter(inc.date, todayStr, currentMonthPrefix)) {
                 totalIncome += inc.amount;
-                // Add Income details directly to our unified display model list
-                aggregatedItems.add(new TransactionItem(inc.source, inc.date, inc.amount, true));
+                aggregatedItems.add(new TransactionItem(
+                    inc.source, inc.date, inc.amount, true, 
+                    "Added directly into balance pools.", null, 0.0
+                ));
             }
         }
 
@@ -239,15 +249,25 @@ public class MainActivity extends AppCompatActivity {
                 String cat = exp.expense.category;
                 categoryMap.put(cat, categoryMap.getOrDefault(cat, 0.0) + exp.expense.amount);
 
-                // Add Expense details directly to our unified display model list
-                aggregatedItems.add(new TransactionItem(exp.expense.category, exp.expense.date, exp.expense.amount, false));
+                String srcName = exp.sourceName != null ? exp.sourceName : "Unlinked Pool";
+                double availableSrcBal = 0.0;
+                if (exp.expense.incomeSourceId != null && sourceBalanceMap.containsKey(exp.expense.incomeSourceId)) {
+                    availableSrcBal = sourceBalanceMap.get(exp.expense.incomeSourceId);
+                }
+
+                aggregatedItems.add(new TransactionItem(
+                    exp.expense.category, 
+                    exp.expense.date, 
+                    exp.expense.amount, 
+                    false, 
+                    exp.expense.note, 
+                    srcName, 
+                    availableSrcBal
+                ));
             }
         }
 
-        // Sort items chronologically by date string descending
         Collections.sort(aggregatedItems, (item1, item2) -> item2.getDate().compareTo(item1.getDate()));
-
-        // Push the formatted lists directly into our adapter engine
         transactionAdapter.updateData(aggregatedItems);
 
         double netBalance = totalIncome - totalExpense;
