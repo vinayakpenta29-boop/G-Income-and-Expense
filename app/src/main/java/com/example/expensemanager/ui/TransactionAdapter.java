@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.expensemanager.R;
@@ -20,10 +21,21 @@ import java.util.List;
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder> {
 
     private List<TransactionItem> transactionList = new ArrayList<>();
+    private OnTransactionLongClickListener longClickListener;
+
+    // Interface callback for handling user events inside MainActivity
+    public interface OnTransactionLongClickListener {
+        void onEditSelected(TransactionItem item);
+        void onDeleteSelected(TransactionItem item);
+    }
 
     public void updateData(List<TransactionItem> newList) {
         this.transactionList = newList;
         notifyDataSetChanged();
+    }
+
+    public void setOnTransactionLongClickListener(OnTransactionLongClickListener listener) {
+        this.longClickListener = listener;
     }
 
     @NonNull
@@ -47,18 +59,36 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             holder.tvRowAmount.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.expense_red));
         }
 
-        // ATTACH CLICK ACTION TRIGGER TO RUN OVERLAY DETAILS VIEW DIALOG
+        // Single press shows transaction details card overlay pop-up
         holder.itemView.setOnClickListener(v -> showPremiumDetailsPopUp(v.getContext(), item));
+
+        // NEW: Long Press triggers option menus (Edit/Delete)
+        holder.itemView.setOnLongClickListener(v -> {
+            if (longClickListener != null) {
+                PopupMenu popup = new PopupMenu(v.getContext(), holder.tvRowAmount);
+                popup.getMenu().add("Edit Transaction");
+                popup.getMenu().add("Delete Transaction");
+                
+                popup.setOnMenuItemClickListener(menuItem -> {
+                    if (menuItem.getTitle().equals("Edit Transaction")) {
+                        longClickListener.onEditSelected(item);
+                    } else if (menuItem.getTitle().equals("Delete Transaction")) {
+                        longClickListener.onDeleteSelected(item);
+                    }
+                    return true;
+                });
+                popup.show();
+            }
+            return true;
+        });
     }
 
     private void showPremiumDetailsPopUp(android.content.Context context, TransactionItem item) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_transaction_details, null);
         builder.setView(dialogView);
-
         AlertDialog dialog = builder.create();
 
-        // Bind overlay controls
         TextView tvDlgType = dialogView.findViewById(R.id.tvDlgType);
         TextView tvDlgTitle = dialogView.findViewById(R.id.tvDlgTitle);
         TextView tvDlgDate = dialogView.findViewById(R.id.tvDlgDate);
@@ -69,7 +99,6 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         TextView tvDlgSourceBalance = dialogView.findViewById(R.id.tvDlgSourceBalance);
         Button btnDlgClose = dialogView.findViewById(R.id.btnDlgClose);
 
-        // Map general structural information variables
         tvDlgTitle.setText(item.getTitle());
         tvDlgDate.setText("Date Logged: " + item.getDate());
         tvDlgNote.setText(item.getNote() != null && !item.getNote().isEmpty() ? item.getNote() : "No contextual notes logged.");
@@ -83,20 +112,15 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             tvDlgType.setText("EXPENSE TRANSACTION RECORD");
             tvDlgAmount.setText("- ₹" + item.getAmount());
             tvDlgAmount.setTextColor(ContextCompat.getColor(context, R.color.expense_red));
-            
-            // Render funding source profile contextual calculations
             layoutDlgExpenseDetails.setVisibility(View.VISIBLE);
             tvDlgLinkedSource.setText(item.getLinkedSourceName());
             tvDlgSourceBalance.setText("₹" + item.getLinkedSourceAvailableBalance());
         }
 
         btnDlgClose.setOnClickListener(v -> dialog.dismiss());
-
-        // CRITICAL FOR CARD CURVES: Masks background system canvas framing blocks clear transparent
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
-
         dialog.show();
     }
 
