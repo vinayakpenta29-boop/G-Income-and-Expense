@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand_primary">#1E293B</color>       <color name="brand_secondary">#475569</color>     <color name="window_background">#F8FAFC</color>   <color name="income_green">#0F766E</color>        <color name="expense_red">#BE123C</color>         <color name="card_bg_surface">#FFFFFF</color>     <color name="text_dark">#0F172A</color>           <color name="text_muted">#64748B</color>          
+</resources>
