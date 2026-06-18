@@ -30,7 +30,9 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
-        TransactionItem item = transactionList[position];
+        // FIX: Swapped array syntax [] for Java List object API syntax .get()
+        TransactionItem item = transactionList.get(position);
+        
         holder.tvRowTitle.setText(item.getTitle());
         holder.tvRowDate.setText(item.getDate());
 
