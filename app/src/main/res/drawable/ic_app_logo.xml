@@ -1,0 +1,38 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Layer 1: Luxury Deep Slate Background Frame Canvas -->
+    <path
+        android:fillColor="#1E293B"
+        android:pathData="M96,0 h320 c53,0 96,43 96,96 v320 c0,53 -43,96 -96,96 h-320 c-53,0 -96,-43 -96,-96 v-320 c0,-53 43,-96 96,-96 z" />
+
+    <!-- Layer 2: Geometric Thin Structural Background Accent Ring -->
+    <path
+        android:strokeColor="#334155"
+        android:strokeWidth="6"
+        android:pathData="M256,256 m-150,0 a150,150 0,1 1,300 0 a150,150 0,1 1,-300 0" />
+
+    <!-- Layer 3: Minimalist Pure White Rupee Upper Crossbar -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M170,165 h172 v28 h-172 z" />
+
+    <!-- Layer 4: Minimalist Pure White Rupee Middle Crossbar -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M170,220 h135 v28 h-135 z" />
+
+    <!-- Layer 5: Elegant Main Spine Curve of the Indian Rupee Symbol -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M230,165 v115 c35,0 65,-15 75,-50 h32 c-10,50 -45,78 -107,78 v35 h-30 v-35 c-35,0 -60,-4 -60,-4 v-26 s25,4 60,4 v-42 h-35 v-28 h35 v-47 z" />
+
+    <!-- Layer 6: Dynamic Premium Emerald Green Financial Growth Ascending Leg -->
+    <path
+        android:fillColor="#0F766E"
+        android:pathData="M228,338 l105,105 h40 l-115,-115 z" />
+
+</vector>
