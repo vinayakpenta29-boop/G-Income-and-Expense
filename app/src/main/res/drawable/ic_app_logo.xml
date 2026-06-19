@@ -4,48 +4,53 @@
     android:viewportWidth="512"
     android:viewportHeight="512">
 
-    <!-- Premium Full-Bleed Background Layer (Eliminates Launcher White Borders Completely) -->
+    <!-- Premium Full-Bleed Background Canvas (Eliminates Launcher White Borders Completely) -->
     <path
         android:fillColor="#0F172A"
         android:pathData="M0,0 h512 v512 h-512 z"/>
 
-    <!-- ==================== AUTHENTIC RUPEE SYMBOL (WHITE) ==================== -->
+    <!-- ==================== GENUINE INDIAN RUPEE SYMBOL (WHITE) ==================== -->
 
     <!-- 1. Top Primary Horizontal Crossbar -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M160,140 h192 v28 h-192 z" />
+        android:pathData="M160,130 h180 v32 h-180 z" />
 
     <!-- 2. Middle Secondary Horizontal Crossbar -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M160,198 h142 v28 h-142 z" />
+        android:pathData="M160,195 h140 v32 h-140 z" />
 
-    <!-- 3. Short Left Spine Connector (Truncated: Stops at the middle bar) -->
+    <!-- 3. Corrected Left Spine Connector (Truncated: Stops exactly at the middle bar) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M200,168 h28 v58 h-28 z" />
+        android:pathData="M195,130 h32 v144 h-32 z" />
 
     <!-- 4. Perfectly Rounded Outer Loop Arc -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M228,168 h44 c32,0 58,26 58,58 c0,32 -26,58 -58,58 h-44 z" />
+        android:pathData="M227,162 C295,162 315,190 315,213 C315,236 295,264 227,264 z" />
 
-    <!-- 5. Inner Loop Window Cutout (Matches background to create a crisp hollow frame) -->
+    <!-- 5. Inner Loop Window Cutout (Matches background slate tone to form a crisp hollow frame) -->
     <path
         android:fillColor="#0F172A"
-        android:pathData="M228,198 h44 c16,0 28,12 28,28 c0,16 -12,28 -28,28 h-44 z" />
+        android:pathData="M227,194 C265,194 280,202 280,213 C280,224 265,232 227,232 z" />
 
-    <!-- 6. Geometric Slanted Right Leg -->
+    <!-- 6. Bold Geometric Slanted Right Leg -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M228,284 L310,390 h36 L256,284 z" />
+        android:pathData="M227,260 L307,380 h40 L257,260 z" />
 
     <!-- ==================== FIN-TECH GROWTH ARROW (EMERALD) ==================== -->
     
-    <!-- 7. Sharp Minimalist Upward Trendline Arrow Polygon -->
+    <!-- 7. Thick Arrow Trendline Shaft -->
     <path
         android:fillColor="#10B981"
-        android:pathData="M330,360 L410,280 V305 H430 V240 H365 V260 H390 L310,340 Z" />
+        android:pathData="M320,370 L400,290 L422,312 L342,392 Z" />
+
+    <!-- 8. Sharp Minimalist Arrowhead Polygon -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M380,250 H430 V300 L410,280 Z" />
 
 </vector>
