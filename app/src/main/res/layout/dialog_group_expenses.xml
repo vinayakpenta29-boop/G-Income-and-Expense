@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@android:color/transparent">
+
+    <TextView
+        android:id="@+id/tvDialogGroupTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="FAMILY SUMMARY"
+        android:textColor="@color/purple_dark"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/purple_primary"
+        android:layout_marginBottom="16dp"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        
+        <LinearLayout
+            android:id="@+id/llGroupExpenseListContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"/>
+    </ScrollView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/purple_primary"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:id="@+id/tvGroupPaid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Total Paid: ₹0.00"
+        android:textColor="@color/text_dark"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-monospace"/>
+
+    <TextView
+        android:id="@+id/tvGroupShare"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Total Share: ₹0.00"
+        android:textColor="@color/text_gray"
+        android:textSize="16sp"
+        android:layout_marginTop="4dp"
+        android:fontFamily="sans-serif-monospace"/>
+
+    <TextView
+        android:id="@+id/tvGroupBalance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Net Balance: ₹0.00"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginTop="12dp"
+        android:fontFamily="sans-serif-monospace"/>
+
+</LinearLayout>
