@@ -17,13 +17,13 @@ import com.example.expensemanager.R;
 import com.example.expensemanager.data.TransactionItem;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder> {
 
     private List<TransactionItem> transactionList = new ArrayList<>();
     private OnTransactionLongClickListener longClickListener;
 
-    // Interface callback for handling user events inside MainActivity
     public interface OnTransactionLongClickListener {
         void onEditSelected(TransactionItem item);
         void onDeleteSelected(TransactionItem item);
@@ -51,18 +51,18 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         holder.tvRowTitle.setText(item.getTitle());
         holder.tvRowDate.setText(item.getDate());
 
+        // Formatted to 2 decimal places
+        String formattedAmt = String.format(Locale.US, "%.2f", item.getAmount());
         if (item.isIncome()) {
-            holder.tvRowAmount.setText("+ ₹" + item.getAmount());
+            holder.tvRowAmount.setText("+ ₹" + formattedAmt);
             holder.tvRowAmount.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.income_green));
         } else {
-            holder.tvRowAmount.setText("- ₹" + item.getAmount());
+            holder.tvRowAmount.setText("- ₹" + formattedAmt);
             holder.tvRowAmount.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.expense_red));
         }
 
-        // Single press shows transaction details card overlay pop-up
         holder.itemView.setOnClickListener(v -> showPremiumDetailsPopUp(v.getContext(), item));
 
-        // NEW: Long Press triggers option menus (Edit/Delete)
         holder.itemView.setOnLongClickListener(v -> {
             if (longClickListener != null) {
                 PopupMenu popup = new PopupMenu(v.getContext(), holder.tvRowAmount);
@@ -101,20 +101,24 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
         tvDlgTitle.setText(item.getTitle());
         tvDlgDate.setText("Date Logged: " + item.getDate());
-        tvDlgNote.setText(item.getNote() != null && !item.getNote().isEmpty() ? item.getNote() : "No contextual notes logged.");
+        tvDlgNote.setText(item.getNote() != null && !item.getNote().isEmpty() ? item.getNote() : "No notes recorded.");
+
+        String formattedAmt = String.format(Locale.US, "%.2f", item.getAmount());
 
         if (item.isIncome()) {
             tvDlgType.setText("INCOME TRANSACTION RECORD");
-            tvDlgAmount.setText("+ ₹" + item.getAmount());
+            tvDlgAmount.setText("+ ₹" + formattedAmt);
             tvDlgAmount.setTextColor(ContextCompat.getColor(context, R.color.income_green));
             layoutDlgExpenseDetails.setVisibility(View.GONE);
         } else {
             tvDlgType.setText("EXPENSE TRANSACTION RECORD");
-            tvDlgAmount.setText("- ₹" + item.getAmount());
+            tvDlgAmount.setText("- ₹" + formattedAmt);
             tvDlgAmount.setTextColor(ContextCompat.getColor(context, R.color.expense_red));
             layoutDlgExpenseDetails.setVisibility(View.VISIBLE);
             tvDlgLinkedSource.setText(item.getLinkedSourceName());
-            tvDlgSourceBalance.setText("₹" + item.getLinkedSourceAvailableBalance());
+            
+            String formattedSourceBal = String.format(Locale.US, "%.2f", item.getLinkedSourceAvailableBalance());
+            tvDlgSourceBalance.setText("₹" + formattedSourceBal);
         }
 
         btnDlgClose.setOnClickListener(v -> dialog.dismiss());
