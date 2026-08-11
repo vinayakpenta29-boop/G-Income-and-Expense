@@ -66,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
         transactionAdapter = new TransactionAdapter();
         rvTransactionHistory.setAdapter(transactionAdapter);
 
-        // ATTACH THE LONG PRESS ACTIONS INTERFACE CALLBACK
         transactionAdapter.setOnTransactionLongClickListener(new TransactionAdapter.OnTransactionLongClickListener() {
             @Override
             public void onEditSelected(TransactionItem item) {
@@ -167,7 +166,8 @@ public class MainActivity extends AppCompatActivity {
         List<String> sourceOptions = new ArrayList<>();
         sourceOptions.add("--Select Source--");
         for (Income inc : currentIncomes) {
-            sourceOptions.add(inc.source + " (₹" + inc.amount + ")");
+            String formattedAmt = String.format(Locale.US, "%.2f", inc.amount);
+            sourceOptions.add(inc.source + " (₹" + formattedAmt + ")");
         }
         ArrayAdapter<String> sourceAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, sourceOptions);
         spIncomeSources.setAdapter(sourceAdapter);
@@ -191,8 +191,9 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Please enter an income source.", Toast.LENGTH_SHORT).show();
                 return;
             }
+            // Saved user note to Income entity
             AppDatabase.databaseWriteExecutor.execute(() -> {
-                dao.insertIncome(new Income(amount, sourceName, selectedTransactionDate, "Online"));
+                dao.insertIncome(new Income(amount, sourceName, selectedTransactionDate, "Online", noteStr));
             });
         } else if (transactionType.equals("Expense")) {
             int selectedSourceIndex = spIncomeSources.getSelectedItemPosition();
@@ -223,7 +224,6 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Transaction logged successfully!", Toast.LENGTH_SHORT).show();
     }
 
-    // NEW: Action handler displaying database modification prompts
     private void showEditTransactionDialog(TransactionItem item) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Edit Transaction Entries");
@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
         final EditText inputAmount = new EditText(this);
         inputAmount.setHint("Amount (₹)");
         inputAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        inputAmount.setText(String.valueOf(item.getAmount()));
+        inputAmount.setText(String.format(Locale.US, "%.2f", item.getAmount()));
         layout.addView(inputAmount);
 
         final EditText inputLabel = new EditText(this);
@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
 
             AppDatabase.databaseWriteExecutor.execute(() -> {
                 if (item.isIncome()) {
-                    Income updatedIncome = new Income(amount, lblStr, item.getDate(), "Online");
+                    Income updatedIncome = new Income(amount, lblStr, item.getDate(), "Online", item.getNote());
                     updatedIncome.id = item.getId();
                     dao.updateIncome(updatedIncome);
                 } else {
@@ -270,7 +270,6 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    // NEW: Action handler displaying database removal prompts
     private void showDeleteConfirmationDialog(TransactionItem item) {
         new AlertDialog.Builder(this)
                 .setTitle("Delete Transaction")
@@ -278,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton("Delete", (dialog, which) -> {
                     AppDatabase.databaseWriteExecutor.execute(() -> {
                         if (item.isIncome()) {
-                            Income targetIncome = new Income(0,"","","");
+                            Income targetIncome = new Income(0,"","","","");
                             targetIncome.id = item.getId();
                             dao.deleteIncome(targetIncome);
                         } else {
@@ -315,10 +314,10 @@ public class MainActivity extends AppCompatActivity {
         for (Income inc : currentIncomes) {
             if (shouldIncludeInFilter(inc.date, todayStr, currentMonthPrefix)) {
                 totalIncome += inc.amount;
-                // Updated: Added database table entity id reference
+                // Passed inc.note to TransactionItem
                 aggregatedItems.add(new TransactionItem(
                     inc.id, inc.source, inc.date, inc.amount, true, 
-                    "Added directly into balance pools.", null, null, 0.0
+                    inc.note, null, null, 0.0
                 ));
             }
         }
@@ -339,7 +338,6 @@ public class MainActivity extends AppCompatActivity {
                     availableSrcBal = sourceBalanceMap.get(exp.expense.incomeSourceId);
                 }
 
-                // Updated: Added database entity id and tracking references
                 aggregatedItems.add(new TransactionItem(
                     exp.expense.id, 
                     exp.expense.category, 
@@ -359,16 +357,18 @@ public class MainActivity extends AppCompatActivity {
 
         double netBalance = totalIncome - totalExpense;
 
-        tvTotalIncome.setText("₹" + totalIncome);
-        tvTotalExpense.setText("₹" + totalExpense);
-        tvNetBalance.setText("₹" + netBalance);
+        // Strict 2-decimal formatting for summaries
+        tvTotalIncome.setText("₹" + String.format(Locale.US, "%.2f", totalIncome));
+        tvTotalExpense.setText("₹" + String.format(Locale.US, "%.2f", totalExpense));
+        tvNetBalance.setText("₹" + String.format(Locale.US, "%.2f", netBalance));
 
         if (categoryMap.isEmpty()) {
             tvCategoryBreakdown.setText("No expenses for this selected timeframe range.");
         } else {
             StringBuilder breakdown = new StringBuilder();
             for (Map.Entry<String, Double> entry : categoryMap.entrySet()) {
-                breakdown.append(entry.getKey()).append(": ₹").append(entry.getValue()).append("  |  ");
+                String formattedValue = String.format(Locale.US, "%.2f", entry.getValue());
+                breakdown.append(entry.getKey()).append(": ₹").append(formattedValue).append("  |  ");
             }
             tvCategoryBreakdown.setText(breakdown.toString());
         }
