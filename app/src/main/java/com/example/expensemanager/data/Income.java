@@ -10,12 +10,14 @@ public class Income {
     public double amount;
     public String source;
     public String date;
-    public String paymentMethod; 
+    public String paymentMethod;
+    public String note; // Added note field
 
-    public Income(double amount, String source, String date, String paymentMethod) {
+    public Income(double amount, String source, String date, String paymentMethod, String note) {
         this.amount = amount;
         this.source = source;
         this.date = date;
         this.paymentMethod = paymentMethod;
+        this.note = note;
     }
 }
