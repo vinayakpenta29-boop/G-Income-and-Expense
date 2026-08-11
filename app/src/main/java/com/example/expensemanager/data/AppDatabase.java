@@ -7,8 +7,8 @@ import androidx.room.RoomDatabase;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-// FIX: Bumped version from 1 to 2 to signal a structural update
-@Database(entities = {Income.class, Expense.class}, version = 2, exportSchema = false)
+// Bumped database version to 3 for schema migration
+@Database(entities = {Income.class, Expense.class}, version = 3, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract ExpenseManagerDao expenseManagerDao();
 
@@ -22,7 +22,6 @@ public abstract class AppDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, "expense_manager_database")
-                            // FIX: Clear out old database structure configurations on conflict instead of throwing a launch crash
                             .fallbackToDestructiveMigration()
                             .build();
                 }
