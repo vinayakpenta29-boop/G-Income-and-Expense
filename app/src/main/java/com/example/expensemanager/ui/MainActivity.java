@@ -112,20 +112,22 @@ public class MainActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
+        // Dynamic visibility toggles based on transaction type
         spTransactionType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedType = types[position];
                 if (selectedType.equals("Income")) {
                     findViewById(R.id.inputLayoutAmount).setVisibility(View.VISIBLE);
-                    findViewById(R.id.inputLayoutTitle).setVisibility(View.VISIBLE);
-                    ((com.google.android.material.textfield.TextInputLayout)findViewById(R.id.inputLayoutTitle)).setHint("Income Source / Title (e.g. Salary)");
+                    // HIDE Title input completely for Income
+                    findViewById(R.id.inputLayoutTitle).setVisibility(View.GONE);
                     layoutSourceSelection.setVisibility(View.VISIBLE);
                     findViewById(R.id.inputLayoutNote).setVisibility(View.VISIBLE);
                     btnSaveTransaction.setVisibility(View.VISIBLE);
                     populateAccountSourceSpinner();
                 } else if (selectedType.equals("Expense")) {
                     findViewById(R.id.inputLayoutAmount).setVisibility(View.VISIBLE);
+                    // SHOW Category input for Expense
                     findViewById(R.id.inputLayoutTitle).setVisibility(View.VISIBLE);
                     ((com.google.android.material.textfield.TextInputLayout)findViewById(R.id.inputLayoutTitle)).setHint("Expense Category (e.g. Food)");
                     layoutSourceSelection.setVisibility(View.VISIBLE);
@@ -144,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        // Room Observers
+        // Observers
         dao.getAllSources().observe(this, sources -> {
             currentSources = sources;
             populateAccountSourceSpinner();
@@ -174,7 +176,6 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    // 3-DOTS MENU: MANAGE SOURCES DIALOG
     private void showManageSourcesDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Manage Account Sources");
@@ -185,7 +186,6 @@ public class MainActivity extends AppCompatActivity {
 
         TextView info = new TextView(this);
         info.setText("Available Sources (Click to delete):");
-        // FIX: Replaced invalid '14sp' with numeric float '14'
         info.setTextSize(14);
         info.setPadding(0, 0, 0, 10);
         container.addView(info);
@@ -283,12 +283,11 @@ public class MainActivity extends AppCompatActivity {
     private void handleTransactionProcessing() {
         String transactionType = spTransactionType.getSelectedItem().toString();
         String amountStr = etAmount.getText().toString().trim();
-        String titleStr = etTitleInput.getText().toString().trim();
         String noteStr = etNote.getText().toString().trim();
         int selectedSourcePos = spAccountSource.getSelectedItemPosition();
 
-        if (transactionType.equals("--Select--") || amountStr.isEmpty() || titleStr.isEmpty()) {
-            Toast.makeText(this, "Please fill in amount and category/title.", Toast.LENGTH_SHORT).show();
+        if (transactionType.equals("--Select--") || amountStr.isEmpty()) {
+            Toast.makeText(this, "Please enter amount.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -301,12 +300,18 @@ public class MainActivity extends AppCompatActivity {
         AccountSource selectedSource = currentSources.get(selectedSourcePos - 1);
 
         if (transactionType.equals("Income")) {
+            // Automatically uses source name as the title
             AppDatabase.databaseWriteExecutor.execute(() -> {
-                dao.insertIncome(new Income(amount, titleStr, selectedSource.id, selectedSource.name, selectedTransactionDate, "Online", noteStr));
+                dao.insertIncome(new Income(amount, selectedSource.name, selectedSource.id, selectedSource.name, selectedTransactionDate, "Online", noteStr));
             });
         } else if (transactionType.equals("Expense")) {
+            String categoryStr = etTitleInput.getText().toString().trim();
+            if (categoryStr.isEmpty()) {
+                Toast.makeText(this, "Please enter an expense category.", Toast.LENGTH_SHORT).show();
+                return;
+            }
             AppDatabase.databaseWriteExecutor.execute(() -> {
-                dao.insertExpense(new Expense(amount, titleStr, selectedSource.id, selectedSource.name, selectedTransactionDate, noteStr));
+                dao.insertExpense(new Expense(amount, categoryStr, selectedSource.id, selectedSource.name, selectedTransactionDate, noteStr));
             });
         }
 
@@ -319,7 +324,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showEditTransactionDialog(TransactionItem item) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Edit Transaction");
+        builder.setTitle(item.isIncome() ? "Edit Income Transaction" : "Edit Expense Transaction");
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -332,25 +337,36 @@ public class MainActivity extends AppCompatActivity {
         layout.addView(inputAmount);
 
         final EditText inputTitle = new EditText(this);
-        inputTitle.setHint(item.isIncome() ? "Income Title" : "Expense Category");
-        inputTitle.setText(item.getTitle());
-        layout.addView(inputTitle);
+        if (!item.isIncome()) {
+            inputTitle.setHint("Expense Category (e.g. Food)");
+            inputTitle.setText(item.getTitle());
+            layout.addView(inputTitle);
+        }
+
+        final EditText inputNote = new EditText(this);
+        inputNote.setHint("Note / Description (Optional)");
+        inputNote.setText(item.getNote() != null ? item.getNote() : "");
+        layout.addView(inputNote);
 
         builder.setView(layout);
 
         builder.setPositiveButton("Save", (dialog, which) -> {
             String amtStr = inputAmount.getText().toString().trim();
-            String title = inputTitle.getText().toString().trim();
-            if (amtStr.isEmpty() || title.isEmpty()) return;
+            if (amtStr.isEmpty()) return;
 
+            String title = item.isIncome() ? (item.getSourceName() != null ? item.getSourceName() : "Income") : inputTitle.getText().toString().trim();
+            if (!item.isIncome() && title.isEmpty()) return;
+
+            String note = inputNote.getText().toString().trim();
             double amount = Double.parseDouble(amtStr);
+
             AppDatabase.databaseWriteExecutor.execute(() -> {
                 if (item.isIncome()) {
-                    Income inc = new Income(amount, title, item.getSourceId(), item.getSourceName(), item.getDate(), "Online", item.getNote());
+                    Income inc = new Income(amount, title, item.getSourceId(), item.getSourceName(), item.getDate(), "Online", note);
                     inc.id = item.getId();
                     dao.updateIncome(inc);
                 } else {
-                    Expense exp = new Expense(amount, title, item.getSourceId(), item.getSourceName(), item.getDate(), item.getNote());
+                    Expense exp = new Expense(amount, title, item.getSourceId(), item.getSourceName(), item.getDate(), note);
                     exp.id = item.getId();
                     dao.updateExpense(exp);
                 }
@@ -397,8 +413,9 @@ public class MainActivity extends AppCompatActivity {
             if (shouldIncludeInFilter(inc.date, todayStr, currentMonthPrefix)) {
                 totalIncome += inc.amount;
                 double availBal = inc.sourceId != null ? sourceBalances.getOrDefault(inc.sourceId, 0.0) : 0.0;
+                String displayTitle = inc.sourceName != null ? inc.sourceName : "Income";
                 aggregatedItems.add(new TransactionItem(
-                    inc.id, inc.title, inc.date, inc.amount, true, 
+                    inc.id, displayTitle, inc.date, inc.amount, true, 
                     inc.note, inc.sourceId, inc.sourceName, availBal
                 ));
             }
