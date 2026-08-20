@@ -1,362 +1,356 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/window_background"
-    android:fillViewport="true">
+    android:orientation="vertical"
+    android:background="@color/window_background">
 
-    <LinearLayout
+    <!-- TOP APP BAR WITH 3-DOTS MENU -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:background="@color/window_background"
+        app:title="Expense Manager"
+        app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge"
+        app:titleTextColor="@color/text_dark"/>
 
-        <!-- HEADER APP TITLE -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Expense Manager"
-            android:textColor="@color/text_dark"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:letterSpacing="-0.02"
-            android:layout_marginBottom="4dp"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Track your financial balance effortlessly"
-            android:textColor="@color/text_muted"
-            android:textSize="7sp"
-            android:layout_marginBottom="24dp"/>
-
-        <!-- TIME PERIOD FILTER CONTAINER -->
-        <com.google.android.material.card.MaterialCardView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp"
-            app:strokeColor="#E2E8F0"
-            app:strokeWidth="1dp"
-            app:cardBackgroundColor="@color/card_bg_surface">
-            
-            <LinearLayout
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingBottom="24dp">
+
+            <!-- TIME PERIOD FILTER CONTAINER -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="12dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="View Period"
-                    android:textColor="@color/text_dark"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginEnd="16dp"/>
-                <Spinner
-                    android:id="@+id/spTimeFilter"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:backgroundTint="@color/brand_primary"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- LUXURY DASHBOARD SUMMARY CARD -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="@color/brand_primary"
-            app:strokeWidth="0dp">
-            
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="24dp">
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E2E8F0"
+                app:strokeWidth="1dp"
+                app:cardBackgroundColor="@color/card_bg_surface">
                 
-                <TextView 
-                    android:layout_width="wrap_content" 
-                    android:layout_height="wrap_content" 
-                    android:text="NET BALANCE" 
-                    android:textColor="#94A3B8" 
-                    android:textSize="11sp" 
-                    android:textStyle="bold"
-                    android:letterSpacing="0.1"/>
-                
-                <TextView 
-                    android:id="@+id/tvNetBalance" 
-                    android:layout_width="wrap_content" 
-                    android:layout_height="wrap_content" 
-                    android:text="₹0.0" 
-                    android:textColor="#FFFFFF" 
-                    android:textSize="36sp" 
-                    android:textStyle="bold"
-                    android:layout_marginBottom="16dp"
-                    android:letterSpacing="-0.03"/>
-
-                <View 
-                    android:layout_width="match_parent" 
-                    android:layout_height="1dp" 
-                    android:background="#334155" 
-                    android:layout_marginBottom="16dp"/>
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:weightSum="2"
-                    android:orientation="horizontal">
-                    
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Total Income" android:textColor="#A7F3D0" android:textSize="12sp"/>
-                        <TextView android:id="@+id/tvTotalIncome" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="₹0.0" android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold"/>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Total Expenses" android:textColor="#FECDD3" android:textSize="12sp"/>
-                        <TextView android:id="@+id/tvTotalExpense" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="₹0.0" android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold"/>
-                    </LinearLayout>
-                </LinearLayout>
-
-                <View 
-                    android:layout_width="match_parent" 
-                    android:layout_height="1dp" 
-                    android:background="#334155" 
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="12dp"/>
-                
-                <TextView 
-                    android:layout_width="wrap_content" 
-                    android:layout_height="wrap_content" 
-                    android:text="SPENDING BREAKDOWN" 
-                    android:textColor="#94A3B8" 
-                    android:textSize="10sp" 
-                    android:textStyle="bold"
-                    android:letterSpacing="0.05"
-                    android:layout_marginBottom="4dp"/>
-                
-                <TextView 
-                    android:id="@+id/tvCategoryBreakdown" 
-                    android:layout_width="match_parent" 
-                    android:layout_height="wrap_content" 
-                    android:text="No expenses to categorize yet." 
-                    android:textColor="#E2E8F0" 
-                    android:textSize="13sp"
-                    android:lineSpacingMultiplier="1.2"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- DATE SELECTOR ACTION BUTTON -->
-        <Button
-            android:id="@+id/btnPickDate"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:text="Selected Date: Today"
-            android:textColor="@color/brand_primary"
-            app:backgroundTint="#E2E8F0"
-            android:layout_marginBottom="24dp"/>
-
-        <!-- MAIN TRANSACTION LEDGER CARD -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
-            app:strokeColor="#E2E8F0"
-            app:strokeWidth="1dp"
-            app:cardBackgroundColor="@color/card_bg_surface">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-                <TextView 
-                    android:layout_width="wrap_content" 
-                    android:layout_height="wrap_content" 
-                    android:text="Log Transaction" 
-                    android:textColor="@color/text_dark"
-                    android:textStyle="bold" 
-                    android:textSize="16sp"
-                    android:layout_marginBottom="16dp"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:background="@drawable/spinner_border_bg"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="12dp"
-                    android:layout_marginBottom="16dp">
-                    <Spinner
-                        android:id="@+id/spTransactionType"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"/>
-                </LinearLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/inputLayoutAmount"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Amount (₹)"
-                    android:layout_marginBottom="12dp"
-                    android:visibility="gone"
-                    app:boxCornerRadiusTopStart="12dp" app:boxCornerRadiusTopEnd="12dp"
-                    app:boxCornerRadiusBottomStart="12dp" app:boxCornerRadiusBottomEnd="12dp"
-                    app:boxStrokeColor="@color/brand_primary"
-                    app:hintTextColor="@color/brand_primary">
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etAmount"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/text_dark"
-                        android:inputType="numberDecimal"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/inputLayoutSource"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Source (e.g., Salary)"
-                    android:layout_marginBottom="12dp"
-                    android:visibility="gone"
-                    app:boxCornerRadiusTopStart="12dp" app:boxCornerRadiusTopEnd="12dp"
-                    app:boxCornerRadiusBottomStart="12dp" app:boxCornerRadiusBottomEnd="12dp"
-                    app:boxStrokeColor="@color/brand_primary">
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etSourceInput"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/text_dark"
-                        android:inputType="text"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <LinearLayout
-                    android:id="@+id/layoutExpenseSourceSelection"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginBottom="12dp"
-                    android:visibility="gone">
+                    android:padding="12dp">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Link to Income Source"
-                        android:textColor="@color/text_muted"
-                        android:textSize="12sp"
+                        android:text="View Period"
+                        android:textColor="@color/text_dark"
+                        android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginBottom="6dp"/>
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="16dp"/>
+                    <Spinner
+                        android:id="@+id/spTimeFilter"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:backgroundTint="@color/brand_primary"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- LUXURY DASHBOARD SUMMARY CARD -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="@color/brand_primary"
+                app:strokeWidth="0dp">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+                    
+                    <TextView 
+                        android:layout_width="wrap_content" 
+                        android:layout_height="wrap_content" 
+                        android:text="NET BALANCE" 
+                        android:textColor="#94A3B8" 
+                        android:textSize="11sp" 
+                        android:textStyle="bold"
+                        android:letterSpacing="0.1"/>
+                    
+                    <TextView 
+                        android:id="@+id/tvNetBalance" 
+                        android:layout_width="wrap_content" 
+                        android:layout_height="wrap_content" 
+                        android:text="₹0.00" 
+                        android:textColor="#FFFFFF" 
+                        android:textSize="34sp" 
+                        android:textStyle="bold"
+                        android:letterSpacing="-0.03"/>
+
+                    <!-- SOURCES AVAILABLE BALANCES UNDER NET BALANCE -->
+                    <TextView 
+                        android:id="@+id/tvSourcesBreakdown" 
+                        android:layout_width="match_parent" 
+                        android:layout_height="wrap_content" 
+                        android:text="Sources: Loading..." 
+                        android:textColor="#38BDF8" 
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="16dp"
+                        android:lineSpacingMultiplier="1.2"/>
+
+                    <View 
+                        android:layout_width="match_parent" 
+                        android:layout_height="1dp" 
+                        android:background="#334155" 
+                        android:layout_marginBottom="16dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="2"
+                        android:orientation="horizontal">
+                        
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Total Income" android:textColor="#A7F3D0" android:textSize="12sp"/>
+                            <TextView android:id="@+id/tvTotalIncome" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="₹0.00" android:textColor="#FFFFFF" android:textSize="17sp" android:textStyle="bold"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Total Expenses" android:textColor="#FECDD3" android:textSize="12sp"/>
+                            <TextView android:id="@+id/tvTotalExpense" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="₹0.00" android:textColor="#FFFFFF" android:textSize="17sp" android:textStyle="bold"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <View 
+                        android:layout_width="match_parent" 
+                        android:layout_height="1dp" 
+                        android:background="#334155" 
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="12dp"/>
+                    
+                    <TextView 
+                        android:layout_width="wrap_content" 
+                        android:layout_height="wrap_content" 
+                        android:text="SPENDING BREAKDOWN" 
+                        android:textColor="#94A3B8" 
+                        android:textSize="10sp" 
+                        android:textStyle="bold"
+                        android:letterSpacing="0.05"
+                        android:layout_marginBottom="4dp"/>
+                    
+                    <TextView 
+                        android:id="@+id/tvCategoryBreakdown" 
+                        android:layout_width="match_parent" 
+                        android:layout_height="wrap_content" 
+                        android:text="No expenses to categorize yet." 
+                        android:textColor="#E2E8F0" 
+                        android:textSize="13sp"
+                        android:lineSpacingMultiplier="1.2"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- DATE SELECTOR ACTION BUTTON -->
+            <Button
+                android:id="@+id/btnPickDate"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:text="Selected Date: Today"
+                android:textColor="@color/brand_primary"
+                app:backgroundTint="#E2E8F0"
+                android:layout_marginBottom="24dp"/>
+
+            <!-- MAIN TRANSACTION LEDGER CARD -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E2E8F0"
+                app:strokeWidth="1dp"
+                app:cardBackgroundColor="@color/card_bg_surface">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView 
+                        android:layout_width="wrap_content" 
+                        android:layout_height="wrap_content" 
+                        android:text="Log Transaction" 
+                        android:textColor="@color/text_dark"
+                        android:textStyle="bold" 
+                        android:textSize="16sp"
+                        android:layout_marginBottom="16dp"/>
+
+                    <!-- Transaction Type Spinner -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:background="@drawable/spinner_border_bg"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingHorizontal="12dp">
+                        android:paddingHorizontal="12dp"
+                        android:layout_marginBottom="16dp">
                         <Spinner
-                            android:id="@+id/spIncomeSources"
+                            android:id="@+id/spTransactionType"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"/>
                     </LinearLayout>
+
+                    <!-- Amount Box -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/inputLayoutAmount"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Amount (₹)"
+                        android:layout_marginBottom="12dp"
+                        android:visibility="gone"
+                        app:boxCornerRadiusTopStart="12dp" app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp" app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxStrokeColor="@color/brand_primary">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etAmount"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/text_dark"
+                            android:inputType="numberDecimal"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Title/Category Input Box -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/inputLayoutTitle"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Category / Source (e.g. Salary, Food)"
+                        android:layout_marginBottom="12dp"
+                        android:visibility="gone"
+                        app:boxCornerRadiusTopStart="12dp" app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp" app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxStrokeColor="@color/brand_primary">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etTitleInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/text_dark"
+                            android:inputType="text"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Unified Account Source Selection Spinner (Bank, Cash, etc.) -->
+                    <LinearLayout
+                        android:id="@+id/layoutSourceSelection"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginBottom="12dp"
+                        android:visibility="gone">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Select Account / Source:"
+                            android:textColor="@color/text_muted"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="6dp"/>
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:background="@drawable/spinner_border_bg"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:paddingHorizontal="12dp">
+                            <Spinner
+                                android:id="@+id/spAccountSource"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Notes Input -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/inputLayoutNote"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Note / Description (Optional)"
+                        android:layout_marginBottom="16dp"
+                        android:visibility="gone"
+                        app:boxCornerRadiusTopStart="12dp" app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp" app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxStrokeColor="@color/brand_primary">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etNote"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/text_dark"
+                            android:inputType="text"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <Button 
+                        android:id="@+id/btnSaveTransaction" 
+                        android:layout_width="match_parent" 
+                        android:layout_height="54dp" 
+                        android:text="Save Transaction" 
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/brand_primary"
+                        android:visibility="gone"/>
                 </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/inputLayoutCategory"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Category (e.g., Food)"
-                    android:layout_marginBottom="12dp"
-                    android:visibility="gone"
-                    app:boxCornerRadiusTopStart="12dp" app:boxCornerRadiusTopEnd="12dp"
-                    app:boxCornerRadiusBottomStart="12dp" app:boxCornerRadiusBottomEnd="12dp"
-                    app:boxStrokeColor="@color/brand_primary">
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etCategoryInput"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/text_dark"
-                        android:inputType="text"/>
-                </com.google.android.material.textfield.TextInputLayout>
+            <!-- TRANSACTION HISTORY LIST -->
+            <TextView 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:text="Transaction History" 
+                android:textColor="@color/text_dark"
+                android:textStyle="bold" 
+                android:textSize="16sp"
+                android:layout_marginBottom="12dp"/>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/inputLayoutNote"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Note / Description (Optional)"
-                    android:layout_marginBottom="16dp"
-                    android:visibility="gone"
-                    app:boxCornerRadiusTopStart="12dp" app:boxCornerRadiusTopEnd="12dp"
-                    app:boxCornerRadiusBottomStart="12dp" app:boxCornerRadiusBottomEnd="12dp"
-                    app:boxStrokeColor="@color/brand_primary">
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etNote"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/text_dark"
-                        android:inputType="text"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <Button 
-                    android:id="@+id/btnSaveTransaction" 
-                    android:layout_width="match_parent" 
-                    android:layout_height="54dp" 
-                    android:text="Save Transaction" 
-                    android:textColor="#FFFFFF"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="@color/brand_primary"
-                    android:visibility="gone"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- TRANSACTION RECENT RUNNING LOG CONSOLE -->
-        <TextView 
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content" 
-            android:text="Transaction History" 
-            android:textColor="@color/text_dark"
-            android:textStyle="bold" 
-            android:textSize="16sp"
-            android:layout_marginBottom="12dp"/>
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
-            app:strokeColor="#E2E8F0"
-            app:strokeWidth="1dp"
-            app:cardBackgroundColor="@color/card_bg_surface">
-            
-            <!-- FIX: Swapped legacy flat text logs with modern high-performance layout list engine -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvTransactionHistory"
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                android:paddingVertical="8dp"/>
-        </com.google.android.material.card.MaterialCardView>
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E2E8F0"
+                app:strokeWidth="1dp"
+                app:cardBackgroundColor="@color/card_bg_surface">
+                
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvTransactionHistory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:paddingVertical="8dp"/>
+            </com.google.android.material.card.MaterialCardView>
 
-    </LinearLayout>
-</ScrollView>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
