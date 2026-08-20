@@ -12,7 +12,6 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="14dp">
 
-        <!-- LEFT SIDE: Text Hierarchy Information -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -31,17 +30,17 @@
                 android:textStyle="bold"
                 android:letterSpacing="-0.01"/>
 
+            <!-- Displays Date and Source Account (e.g., 2026-08-11 • Cash) -->
             <TextView
-                android:id="@+id/tvRowDate"
+                android:id="@+id/tvRowSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="2026-06-18"
+                android:text="2026-08-11 • Cash"
                 android:textColor="@color/text_muted"
                 android:textSize="12sp"
                 android:layout_marginTop="2dp"/>
         </LinearLayout>
 
-        <!-- RIGHT SIDE: Distinct Styled Bold Amounts -->
         <TextView
             android:id="@+id/tvRowAmount"
             android:layout_width="wrap_content"
@@ -54,7 +53,6 @@
             android:letterSpacing="-0.01"/>
     </RelativeLayout>
 
-    <!-- PREMIUM PREMIUM SUBTLE DIVIDER LINE -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
