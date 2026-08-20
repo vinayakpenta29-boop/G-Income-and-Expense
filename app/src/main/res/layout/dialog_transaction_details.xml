@@ -97,30 +97,30 @@
                 android:lineSpacingMultiplier="1.2"/>
         </LinearLayout>
 
+        <!-- SOURCE ACCOUNT DETAILS -->
         <LinearLayout
-            android:id="@+id/layoutDlgExpenseDetails"
+            android:id="@+id/layoutDlgSourceDetails"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="#F8FAFC"
             android:padding="14dp"
             android:layout_marginTop="4dp"
-            android:layout_marginBottom="16dp"
-            android:visibility="gone">
+            android:layout_marginBottom="16dp">
             
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Funded From Source Profile"
+                android:text="Account / Source"
                 android:textColor="@color/text_muted"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.02"/>
             <TextView
-                android:id="@+id/tvDlgLinkedSource"
+                android:id="@+id/tvDlgSource"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Source Pool"
+                android:text="Bank"
                 android:textColor="@color/text_dark"
                 android:textSize="15sp"
                 android:textStyle="bold"
@@ -130,7 +130,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Source Profile Remaining Asset Balance"
+                android:text="Source Remaining Available Balance"
                 android:textColor="@color/text_muted"
                 android:textSize="11sp"
                 android:textStyle="bold"/>
