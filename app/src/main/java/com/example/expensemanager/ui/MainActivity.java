@@ -112,14 +112,12 @@ public class MainActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        // Dynamic visibility toggles based on transaction type
         spTransactionType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedType = types[position];
                 if (selectedType.equals("Income")) {
                     findViewById(R.id.inputLayoutAmount).setVisibility(View.VISIBLE);
-                    // HIDE Title input completely for Income
                     findViewById(R.id.inputLayoutTitle).setVisibility(View.GONE);
                     layoutSourceSelection.setVisibility(View.VISIBLE);
                     findViewById(R.id.inputLayoutNote).setVisibility(View.VISIBLE);
@@ -127,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
                     populateAccountSourceSpinner();
                 } else if (selectedType.equals("Expense")) {
                     findViewById(R.id.inputLayoutAmount).setVisibility(View.VISIBLE);
-                    // SHOW Category input for Expense
                     findViewById(R.id.inputLayoutTitle).setVisibility(View.VISIBLE);
                     ((com.google.android.material.textfield.TextInputLayout)findViewById(R.id.inputLayoutTitle)).setHint("Expense Category (e.g. Food)");
                     layoutSourceSelection.setVisibility(View.VISIBLE);
@@ -300,7 +297,6 @@ public class MainActivity extends AppCompatActivity {
         AccountSource selectedSource = currentSources.get(selectedSourcePos - 1);
 
         if (transactionType.equals("Income")) {
-            // Automatically uses source name as the title
             AppDatabase.databaseWriteExecutor.execute(() -> {
                 dao.insertIncome(new Income(amount, selectedSource.name, selectedSource.id, selectedSource.name, selectedTransactionDate, "Online", noteStr));
             });
@@ -322,6 +318,7 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Transaction logged successfully!", Toast.LENGTH_SHORT).show();
     }
 
+    // UPDATED: Added Source Selection Dropdown Spinner in Edit Dialog
     private void showEditTransactionDialog(TransactionItem item) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(item.isIncome() ? "Edit Income Transaction" : "Edit Expense Transaction");
@@ -330,12 +327,14 @@ public class MainActivity extends AppCompatActivity {
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(40, 20, 40, 20);
 
+        // Amount Input
         final EditText inputAmount = new EditText(this);
         inputAmount.setHint("Amount (₹)");
         inputAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
         inputAmount.setText(String.format(Locale.US, "%.2f", item.getAmount()));
         layout.addView(inputAmount);
 
+        // Expense Category Input (Only for Expenses)
         final EditText inputTitle = new EditText(this);
         if (!item.isIncome()) {
             inputTitle.setHint("Expense Category (e.g. Food)");
@@ -343,6 +342,32 @@ public class MainActivity extends AppCompatActivity {
             layout.addView(inputTitle);
         }
 
+        // Account Source Label
+        TextView tvSourceLabel = new TextView(this);
+        tvSourceLabel.setText("Account / Source:");
+        tvSourceLabel.setTextSize(13);
+        tvSourceLabel.setPadding(0, 16, 0, 8);
+        layout.addView(tvSourceLabel);
+
+        // Account Source Spinner
+        final Spinner spEditSource = new Spinner(this);
+        List<String> sourceNames = new ArrayList<>();
+        int selectedIndex = 0;
+        for (int i = 0; i < currentSources.size(); i++) {
+            AccountSource src = currentSources.get(i);
+            sourceNames.add(src.name);
+            if (item.getSourceId() != null && src.id == item.getSourceId()) {
+                selectedIndex = i;
+            }
+        }
+        ArrayAdapter<String> sourceAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, sourceNames);
+        spEditSource.setAdapter(sourceAdapter);
+        if (!sourceNames.isEmpty()) {
+            spEditSource.setSelection(selectedIndex);
+        }
+        layout.addView(spEditSource);
+
+        // Note Input
         final EditText inputNote = new EditText(this);
         inputNote.setHint("Note / Description (Optional)");
         inputNote.setText(item.getNote() != null ? item.getNote() : "");
@@ -354,19 +379,23 @@ public class MainActivity extends AppCompatActivity {
             String amtStr = inputAmount.getText().toString().trim();
             if (amtStr.isEmpty()) return;
 
-            String title = item.isIncome() ? (item.getSourceName() != null ? item.getSourceName() : "Income") : inputTitle.getText().toString().trim();
-            if (!item.isIncome() && title.isEmpty()) return;
-
-            String note = inputNote.getText().toString().trim();
             double amount = Double.parseDouble(amtStr);
+            String note = inputNote.getText().toString().trim();
+
+            AccountSource selectedSource = currentSources.isEmpty() ? null : currentSources.get(spEditSource.getSelectedItemPosition());
+            Long newSourceId = selectedSource != null ? selectedSource.id : item.getSourceId();
+            String newSourceName = selectedSource != null ? selectedSource.name : item.getSourceName();
 
             AppDatabase.databaseWriteExecutor.execute(() -> {
                 if (item.isIncome()) {
-                    Income inc = new Income(amount, title, item.getSourceId(), item.getSourceName(), item.getDate(), "Online", note);
+                    String title = newSourceName != null ? newSourceName : "Income";
+                    Income inc = new Income(amount, title, newSourceId, newSourceName, item.getDate(), "Online", note);
                     inc.id = item.getId();
                     dao.updateIncome(inc);
                 } else {
-                    Expense exp = new Expense(amount, title, item.getSourceId(), item.getSourceName(), item.getDate(), note);
+                    String title = inputTitle.getText().toString().trim();
+                    if (title.isEmpty()) title = item.getTitle();
+                    Expense exp = new Expense(amount, title, newSourceId, newSourceName, item.getDate(), note);
                     exp.id = item.getId();
                     dao.updateExpense(exp);
                 }
