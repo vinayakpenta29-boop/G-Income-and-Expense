@@ -2,6 +2,7 @@ package com.example.expensemanager.ui;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AlertDialog;
@@ -9,12 +10,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.expensemanager.R;
+import com.example.expensemanager.data.AccountSource;
 import com.example.expensemanager.data.AppDatabase;
 import com.example.expensemanager.data.Expense;
-import com.example.expensemanager.data.ExpenseWithSource;
 import com.example.expensemanager.data.Income;
 import com.example.expensemanager.data.TransactionItem;
 import com.example.expensemanager.data.ExpenseManagerDao;
+import com.google.android.material.appbar.MaterialToolbar;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -22,17 +24,19 @@ import java.util.*;
 public class MainActivity extends AppCompatActivity {
 
     private ExpenseManagerDao dao;
-    private TextView tvTotalIncome, tvTotalExpense, tvNetBalance, tvCategoryBreakdown;
-    private EditText etAmount, etSourceInput, etCategoryInput, etNote;
-    private Spinner spTransactionType, spIncomeSources, spTimeFilter;
-    private LinearLayout layoutExpenseSourceSelection;
+    private TextView tvTotalIncome, tvTotalExpense, tvNetBalance, tvCategoryBreakdown, tvSourcesBreakdown;
+    private EditText etAmount, etTitleInput, etNote;
+    private Spinner spTransactionType, spAccountSource, spTimeFilter;
+    private LinearLayout layoutSourceSelection;
     private Button btnPickDate, btnSaveTransaction;
+    private MaterialToolbar topAppBar;
 
     private RecyclerView rvTransactionHistory;
     private TransactionAdapter transactionAdapter;
 
+    private List<AccountSource> currentSources = new ArrayList<>();
     private List<Income> currentIncomes = new ArrayList<>();
-    private List<ExpenseWithSource> currentExpenses = new ArrayList<>();
+    private List<Expense> currentExpenses = new ArrayList<>();
     
     private String selectedTransactionDate;
     private String activeFilterMode = "All Time";
@@ -44,17 +48,23 @@ public class MainActivity extends AppCompatActivity {
 
         dao = AppDatabase.getDatabase(this).expenseManagerDao();
 
+        // Bind Toolbar & 3-Dots Menu
+        topAppBar = findViewById(R.id.topAppBar);
+        topAppBar.inflateMenu(R.menu.main_menu);
+        topAppBar.setOnMenuItemClickListener(this::onToolbarMenuItemClicked);
+
+        // Bind Views
         tvTotalIncome = findViewById(R.id.tvTotalIncome);
         tvTotalExpense = findViewById(R.id.tvTotalExpense);
         tvNetBalance = findViewById(R.id.tvNetBalance);
+        tvSourcesBreakdown = findViewById(R.id.tvSourcesBreakdown);
         tvCategoryBreakdown = findViewById(R.id.tvCategoryBreakdown);
         
         spTransactionType = findViewById(R.id.spTransactionType);
         etAmount = findViewById(R.id.etAmount);
-        etSourceInput = findViewById(R.id.etSourceInput);
-        layoutExpenseSourceSelection = findViewById(R.id.layoutExpenseSourceSelection);
-        spIncomeSources = findViewById(R.id.spIncomeSources);
-        etCategoryInput = findViewById(R.id.etCategoryInput);
+        etTitleInput = findViewById(R.id.etTitleInput);
+        layoutSourceSelection = findViewById(R.id.layoutSourceSelection);
+        spAccountSource = findViewById(R.id.spAccountSource);
         etNote = findViewById(R.id.etNote);
         
         btnPickDate = findViewById(R.id.btnPickDate);
@@ -108,24 +118,24 @@ public class MainActivity extends AppCompatActivity {
                 String selectedType = types[position];
                 if (selectedType.equals("Income")) {
                     findViewById(R.id.inputLayoutAmount).setVisibility(View.VISIBLE);
-                    findViewById(R.id.inputLayoutSource).setVisibility(View.VISIBLE);
-                    layoutExpenseSourceSelection.setVisibility(View.GONE);
-                    findViewById(R.id.inputLayoutCategory).setVisibility(View.GONE);
+                    findViewById(R.id.inputLayoutTitle).setVisibility(View.VISIBLE);
+                    ((com.google.android.material.textfield.TextInputLayout)findViewById(R.id.inputLayoutTitle)).setHint("Income Source / Title (e.g. Salary)");
+                    layoutSourceSelection.setVisibility(View.VISIBLE);
                     findViewById(R.id.inputLayoutNote).setVisibility(View.VISIBLE);
                     btnSaveTransaction.setVisibility(View.VISIBLE);
+                    populateAccountSourceSpinner();
                 } else if (selectedType.equals("Expense")) {
                     findViewById(R.id.inputLayoutAmount).setVisibility(View.VISIBLE);
-                    findViewById(R.id.inputLayoutSource).setVisibility(View.GONE);
-                    layoutExpenseSourceSelection.setVisibility(View.VISIBLE);
-                    findViewById(R.id.inputLayoutCategory).setVisibility(View.VISIBLE);
+                    findViewById(R.id.inputLayoutTitle).setVisibility(View.VISIBLE);
+                    ((com.google.android.material.textfield.TextInputLayout)findViewById(R.id.inputLayoutTitle)).setHint("Expense Category (e.g. Food)");
+                    layoutSourceSelection.setVisibility(View.VISIBLE);
                     findViewById(R.id.inputLayoutNote).setVisibility(View.VISIBLE);
                     btnSaveTransaction.setVisibility(View.VISIBLE);
-                    populateIncomeSourceSpinner();
+                    populateAccountSourceSpinner();
                 } else {
                     findViewById(R.id.inputLayoutAmount).setVisibility(View.GONE);
-                    findViewById(R.id.inputLayoutSource).setVisibility(View.GONE);
-                    layoutExpenseSourceSelection.setVisibility(View.GONE);
-                    findViewById(R.id.inputLayoutCategory).setVisibility(View.GONE);
+                    findViewById(R.id.inputLayoutTitle).setVisibility(View.GONE);
+                    layoutSourceSelection.setVisibility(View.GONE);
                     findViewById(R.id.inputLayoutNote).setVisibility(View.GONE);
                     btnSaveTransaction.setVisibility(View.GONE);
                 }
@@ -134,20 +144,127 @@ public class MainActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        dao.getAllIncome().observe(this, incomes -> {
-            currentIncomes = incomes;
-            if (spTransactionType.getSelectedItem().toString().equals("Expense")) {
-                populateIncomeSourceSpinner();
-            }
+        // Observers
+        dao.getAllSources().observe(this, sources -> {
+            currentSources = sources;
+            populateAccountSourceSpinner();
             calculateSummaryAndRefreshLogs();
         });
 
-        dao.getAllExpensesWithSource().observe(this, expenses -> {
+        dao.getAllIncome().observe(this, incomes -> {
+            currentIncomes = incomes;
+            populateAccountSourceSpinner();
+            calculateSummaryAndRefreshLogs();
+        });
+
+        dao.getAllExpenses().observe(this, expenses -> {
             currentExpenses = expenses;
+            populateAccountSourceSpinner();
             calculateSummaryAndRefreshLogs();
         });
 
         btnSaveTransaction.setOnClickListener(v -> handleTransactionProcessing());
+    }
+
+    private boolean onToolbarMenuItemClicked(MenuItem item) {
+        if (item.getItemId() == R.id.action_sources) {
+            showManageSourcesDialog();
+            return true;
+        }
+        return false;
+    }
+
+    // 3-DOTS MENU: MANAGE SOURCES DIALOG
+    private void showManageSourcesDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Manage Account Sources");
+
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.setPadding(30, 20, 30, 10);
+
+        TextView info = new TextView(this);
+        info.setText("Available Sources (Click to delete):");
+        info.setTextSize(14sp);
+        info.setPadding(0, 0, 0, 10);
+        container.addView(info);
+
+        for (AccountSource src : currentSources) {
+            Button btnSrc = new Button(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+            btnSrc.setText(src.name + " ✕");
+            btnSrc.setOnClickListener(v -> {
+                new AlertDialog.Builder(this)
+                        .setTitle("Delete Source")
+                        .setMessage("Delete '" + src.name + "'? Existing transactions linked to this source will remain.")
+                        .setPositiveButton("Delete", (d, w) -> {
+                            AppDatabase.databaseWriteExecutor.execute(() -> dao.deleteSource(src));
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
+            });
+            container.addView(btnSrc);
+        }
+
+        Button btnAdd = new Button(this);
+        btnAdd.setText("+ Add New Source");
+        btnAdd.setOnClickListener(v -> showAddNewSourceDialog());
+        container.addView(btnAdd);
+
+        builder.setView(container);
+        builder.setPositiveButton("Close", null);
+        builder.show();
+    }
+
+    private void showAddNewSourceDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Add New Source Account");
+
+        final EditText input = new EditText(this);
+        input.setHint("Source Name (e.g. SBI Bank, Cash, Paytm)");
+        LinearLayout layout = new LinearLayout(this);
+        layout.setPadding(40, 20, 40, 10);
+        layout.addView(input);
+        builder.setView(layout);
+
+        builder.setPositiveButton("Add", (dialog, which) -> {
+            String name = input.getText().toString().trim();
+            if (!name.isEmpty()) {
+                AppDatabase.databaseWriteExecutor.execute(() -> dao.insertSource(new AccountSource(name)));
+                Toast.makeText(this, "Source '" + name + "' added!", Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
+    }
+
+    private Map<Long, Double> computeSourceBalances() {
+        Map<Long, Double> map = new HashMap<>();
+        for (AccountSource s : currentSources) {
+            map.put(s.id, 0.0);
+        }
+        for (Income inc : currentIncomes) {
+            if (inc.sourceId != null && map.containsKey(inc.sourceId)) {
+                map.put(inc.sourceId, map.get(inc.sourceId) + inc.amount);
+            }
+        }
+        for (Expense exp : currentExpenses) {
+            if (exp.sourceId != null && map.containsKey(exp.sourceId)) {
+                map.put(exp.sourceId, map.get(exp.sourceId) - exp.amount);
+            }
+        }
+        return map;
+    }
+
+    private void populateAccountSourceSpinner() {
+        Map<Long, Double> balances = computeSourceBalances();
+        List<String> options = new ArrayList<>();
+        options.add("--Select Source--");
+        for (AccountSource src : currentSources) {
+            double bal = balances.getOrDefault(src.id, 0.0);
+            options.add(src.name + " (₹" + String.format(Locale.US, "%.2f", bal) + ")");
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, options);
+        spAccountSource.setAdapter(adapter);
     }
 
     private void showDatePickerWindow() {
@@ -162,63 +279,38 @@ public class MainActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 
-    private void populateIncomeSourceSpinner() {
-        List<String> sourceOptions = new ArrayList<>();
-        sourceOptions.add("--Select Source--");
-        for (Income inc : currentIncomes) {
-            String formattedAmt = String.format(Locale.US, "%.2f", inc.amount);
-            sourceOptions.add(inc.source + " (₹" + formattedAmt + ")");
-        }
-        ArrayAdapter<String> sourceAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, sourceOptions);
-        spIncomeSources.setAdapter(sourceAdapter);
-    }
-
     private void handleTransactionProcessing() {
         String transactionType = spTransactionType.getSelectedItem().toString();
         String amountStr = etAmount.getText().toString().trim();
+        String titleStr = etTitleInput.getText().toString().trim();
         String noteStr = etNote.getText().toString().trim();
+        int selectedSourcePos = spAccountSource.getSelectedItemPosition();
 
-        if (transactionType.equals("--Select--") || amountStr.isEmpty()) {
-            Toast.makeText(this, "Please enter valid transaction fields.", Toast.LENGTH_SHORT).show();
+        if (transactionType.equals("--Select--") || amountStr.isEmpty() || titleStr.isEmpty()) {
+            Toast.makeText(this, "Please fill in amount and category/title.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (selectedSourcePos == 0 || currentSources.isEmpty()) {
+            Toast.makeText(this, "Please select an account/source.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         double amount = Double.parseDouble(amountStr);
+        AccountSource selectedSource = currentSources.get(selectedSourcePos - 1);
 
         if (transactionType.equals("Income")) {
-            String sourceName = etSourceInput.getText().toString().trim();
-            if (sourceName.isEmpty()) {
-                Toast.makeText(this, "Please enter an income source.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            // Saved user note to Income entity
             AppDatabase.databaseWriteExecutor.execute(() -> {
-                dao.insertIncome(new Income(amount, sourceName, selectedTransactionDate, "Online", noteStr));
+                dao.insertIncome(new Income(amount, titleStr, selectedSource.id, selectedSource.name, selectedTransactionDate, "Online", noteStr));
             });
         } else if (transactionType.equals("Expense")) {
-            int selectedSourceIndex = spIncomeSources.getSelectedItemPosition();
-            String categoryName = etCategoryInput.getText().toString().trim();
-
-            if (selectedSourceIndex == 0) {
-                Toast.makeText(this, "Please select an active funding income source.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (categoryName.isEmpty()) {
-                Toast.makeText(this, "Please specify an expense category.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            Income correspondingIncome = currentIncomes.get(selectedSourceIndex - 1);
-            long linkedIncomeId = correspondingIncome.id;
-
             AppDatabase.databaseWriteExecutor.execute(() -> {
-                dao.insertExpense(new Expense(amount, categoryName, linkedIncomeId, selectedTransactionDate, noteStr));
+                dao.insertExpense(new Expense(amount, titleStr, selectedSource.id, selectedSource.name, selectedTransactionDate, noteStr));
             });
         }
 
         etAmount.setText("");
-        etSourceInput.setText("");
-        etCategoryInput.setText("");
+        etTitleInput.setText("");
         etNote.setText("");
         spTransactionType.setSelection(0);
         Toast.makeText(this, "Transaction logged successfully!", Toast.LENGTH_SHORT).show();
@@ -226,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showEditTransactionDialog(TransactionItem item) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Edit Transaction Entries");
+        builder.setTitle("Edit Transaction");
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -238,55 +330,53 @@ public class MainActivity extends AppCompatActivity {
         inputAmount.setText(String.format(Locale.US, "%.2f", item.getAmount()));
         layout.addView(inputAmount);
 
-        final EditText inputLabel = new EditText(this);
-        inputLabel.setHint(item.isIncome() ? "Source Name" : "Category Name");
-        inputLabel.setText(item.getTitle());
-        layout.addView(inputLabel);
+        final EditText inputTitle = new EditText(this);
+        inputTitle.setHint(item.isIncome() ? "Income Title" : "Expense Category");
+        inputTitle.setText(item.getTitle());
+        layout.addView(inputTitle);
 
         builder.setView(layout);
 
-        builder.setPositiveButton("Save Revisions", (dialog, which) -> {
+        builder.setPositiveButton("Save", (dialog, which) -> {
             String amtStr = inputAmount.getText().toString().trim();
-            String lblStr = inputLabel.getText().toString().trim();
-            
-            if(amtStr.isEmpty() || lblStr.isEmpty()) return;
-            double amount = Double.parseDouble(amtStr);
+            String title = inputTitle.getText().toString().trim();
+            if (amtStr.isEmpty() || title.isEmpty()) return;
 
+            double amount = Double.parseDouble(amtStr);
             AppDatabase.databaseWriteExecutor.execute(() -> {
                 if (item.isIncome()) {
-                    Income updatedIncome = new Income(amount, lblStr, item.getDate(), "Online", item.getNote());
-                    updatedIncome.id = item.getId();
-                    dao.updateIncome(updatedIncome);
+                    Income inc = new Income(amount, title, item.getSourceId(), item.getSourceName(), item.getDate(), "Online", item.getNote());
+                    inc.id = item.getId();
+                    dao.updateIncome(inc);
                 } else {
-                    Expense updatedExpense = new Expense(amount, lblStr, item.getLinkedSourceId(), item.getDate(), item.getNote());
-                    updatedExpense.id = item.getId();
-                    dao.updateExpense(updatedExpense);
+                    Expense exp = new Expense(amount, title, item.getSourceId(), item.getSourceName(), item.getDate(), item.getNote());
+                    exp.id = item.getId();
+                    dao.updateExpense(exp);
                 }
             });
-            Toast.makeText(MainActivity.this, "Transaction updated!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Updated!", Toast.LENGTH_SHORT).show();
         });
-
-        builder.setNegativeButton("Cancel Actions", (dialog, which) -> dialog.cancel());
+        builder.setNegativeButton("Cancel", null);
         builder.show();
     }
 
     private void showDeleteConfirmationDialog(TransactionItem item) {
         new AlertDialog.Builder(this)
                 .setTitle("Delete Transaction")
-                .setMessage("Are you sure you want to permanently erase this transaction record entry?")
+                .setMessage("Delete this record permanently?")
                 .setPositiveButton("Delete", (dialog, which) -> {
                     AppDatabase.databaseWriteExecutor.execute(() -> {
                         if (item.isIncome()) {
-                            Income targetIncome = new Income(0,"","","","");
-                            targetIncome.id = item.getId();
-                            dao.deleteIncome(targetIncome);
+                            Income inc = new Income(0,"",null,"","","","");
+                            inc.id = item.getId();
+                            dao.deleteIncome(inc);
                         } else {
-                            Expense targetExpense = new Expense(0,"",null,"","");
-                            targetExpense.id = item.getId();
-                            dao.deleteExpense(targetExpense);
+                            Expense exp = new Expense(0,"",null,"","","");
+                            exp.id = item.getId();
+                            dao.deleteExpense(exp);
                         }
                     });
-                    Toast.makeText(MainActivity.this, "Transaction permanently removed.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Deleted.", Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
@@ -297,16 +387,7 @@ public class MainActivity extends AppCompatActivity {
         String todayStr = sdf.format(new Date());
         String currentMonthPrefix = todayStr.substring(0, 7);
 
-        Map<Long, Double> sourceBalanceMap = new HashMap<>();
-        for (Income inc : currentIncomes) {
-            sourceBalanceMap.put(inc.id, inc.amount);
-        }
-        for (ExpenseWithSource exp : currentExpenses) {
-            if (exp.expense.incomeSourceId != null && sourceBalanceMap.containsKey(exp.expense.incomeSourceId)) {
-                double currentBal = sourceBalanceMap.get(exp.expense.incomeSourceId);
-                sourceBalanceMap.put(exp.expense.incomeSourceId, currentBal - exp.expense.amount);
-            }
-        }
+        Map<Long, Double> sourceBalances = computeSourceBalances();
 
         double totalIncome = 0;
         List<TransactionItem> aggregatedItems = new ArrayList<>();
@@ -314,10 +395,10 @@ public class MainActivity extends AppCompatActivity {
         for (Income inc : currentIncomes) {
             if (shouldIncludeInFilter(inc.date, todayStr, currentMonthPrefix)) {
                 totalIncome += inc.amount;
-                // Passed inc.note to TransactionItem
+                double availBal = inc.sourceId != null ? sourceBalances.getOrDefault(inc.sourceId, 0.0) : 0.0;
                 aggregatedItems.add(new TransactionItem(
-                    inc.id, inc.source, inc.date, inc.amount, true, 
-                    inc.note, null, null, 0.0
+                    inc.id, inc.title, inc.date, inc.amount, true, 
+                    inc.note, inc.sourceId, inc.sourceName, availBal
                 ));
             }
         }
@@ -325,29 +406,15 @@ public class MainActivity extends AppCompatActivity {
         double totalExpense = 0;
         Map<String, Double> categoryMap = new HashMap<>();
 
-        for (ExpenseWithSource exp : currentExpenses) {
-            if (shouldIncludeInFilter(exp.expense.date, todayStr, currentMonthPrefix)) {
-                totalExpense += exp.expense.amount;
+        for (Expense exp : currentExpenses) {
+            if (shouldIncludeInFilter(exp.date, todayStr, currentMonthPrefix)) {
+                totalExpense += exp.amount;
+                categoryMap.put(exp.category, categoryMap.getOrDefault(exp.category, 0.0) + exp.amount);
 
-                String cat = exp.expense.category;
-                categoryMap.put(cat, categoryMap.getOrDefault(cat, 0.0) + exp.expense.amount);
-
-                String srcName = exp.sourceName != null ? exp.sourceName : "Unlinked Pool";
-                double availableSrcBal = 0.0;
-                if (exp.expense.incomeSourceId != null && sourceBalanceMap.containsKey(exp.expense.incomeSourceId)) {
-                    availableSrcBal = sourceBalanceMap.get(exp.expense.incomeSourceId);
-                }
-
+                double availBal = exp.sourceId != null ? sourceBalances.getOrDefault(exp.sourceId, 0.0) : 0.0;
                 aggregatedItems.add(new TransactionItem(
-                    exp.expense.id, 
-                    exp.expense.category, 
-                    exp.expense.date, 
-                    exp.expense.amount, 
-                    false, 
-                    exp.expense.note, 
-                    srcName, 
-                    exp.expense.incomeSourceId,
-                    availableSrcBal
+                    exp.id, exp.category, exp.date, exp.amount, false, 
+                    exp.note, exp.sourceId, exp.sourceName, availBal
                 ));
             }
         }
@@ -357,18 +424,33 @@ public class MainActivity extends AppCompatActivity {
 
         double netBalance = totalIncome - totalExpense;
 
-        // Strict 2-decimal formatting for summaries
         tvTotalIncome.setText("₹" + String.format(Locale.US, "%.2f", totalIncome));
         tvTotalExpense.setText("₹" + String.format(Locale.US, "%.2f", totalExpense));
         tvNetBalance.setText("₹" + String.format(Locale.US, "%.2f", netBalance));
+
+        // Display individual source balances below the Net Balance
+        if (currentSources.isEmpty()) {
+            tvSourcesBreakdown.setText("Sources: No sources created yet.");
+        } else {
+            StringBuilder sb = new StringBuilder("Sources:  ");
+            for (AccountSource s : currentSources) {
+                double b = sourceBalances.getOrDefault(s.id, 0.0);
+                sb.append(s.name).append(": ₹").append(String.format(Locale.US, "%.2f", b)).append("   |   ");
+            }
+            String result = sb.toString();
+            if (result.endsWith("   |   ")) {
+                result = result.substring(0, result.length() - 7);
+            }
+            tvSourcesBreakdown.setText(result);
+        }
 
         if (categoryMap.isEmpty()) {
             tvCategoryBreakdown.setText("No expenses for this selected timeframe range.");
         } else {
             StringBuilder breakdown = new StringBuilder();
             for (Map.Entry<String, Double> entry : categoryMap.entrySet()) {
-                String formattedValue = String.format(Locale.US, "%.2f", entry.getValue());
-                breakdown.append(entry.getKey()).append(": ₹").append(formattedValue).append("  |  ");
+                breakdown.append(entry.getKey()).append(": ₹")
+                         .append(String.format(Locale.US, "%.2f", entry.getValue())).append("  |  ");
             }
             tvCategoryBreakdown.setText(breakdown.toString());
         }
