@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -49,9 +48,10 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
         TransactionItem item = transactionList.get(position);
         holder.tvRowTitle.setText(item.getTitle());
-        holder.tvRowDate.setText(item.getDate());
 
-        // Formatted to 2 decimal places
+        String sourceDisplay = item.getSourceName() != null ? item.getSourceName() : "General";
+        holder.tvRowSubtitle.setText(item.getDate() + " • " + sourceDisplay);
+
         String formattedAmt = String.format(Locale.US, "%.2f", item.getAmount());
         if (item.isIncome()) {
             holder.tvRowAmount.setText("+ ₹" + formattedAmt);
@@ -61,14 +61,13 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             holder.tvRowAmount.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.expense_red));
         }
 
-        holder.itemView.setOnClickListener(v -> showPremiumDetailsPopUp(v.getContext(), item));
+        holder.itemView.setOnClickListener(v -> showDetailsPopUp(v.getContext(), item));
 
         holder.itemView.setOnLongClickListener(v -> {
             if (longClickListener != null) {
                 PopupMenu popup = new PopupMenu(v.getContext(), holder.tvRowAmount);
                 popup.getMenu().add("Edit Transaction");
                 popup.getMenu().add("Delete Transaction");
-                
                 popup.setOnMenuItemClickListener(menuItem -> {
                     if (menuItem.getTitle().equals("Edit Transaction")) {
                         longClickListener.onEditSelected(item);
@@ -83,7 +82,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         });
     }
 
-    private void showPremiumDetailsPopUp(android.content.Context context, TransactionItem item) {
+    private void showDetailsPopUp(android.content.Context context, TransactionItem item) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_transaction_details, null);
         builder.setView(dialogView);
@@ -94,8 +93,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         TextView tvDlgDate = dialogView.findViewById(R.id.tvDlgDate);
         TextView tvDlgAmount = dialogView.findViewById(R.id.tvDlgAmount);
         TextView tvDlgNote = dialogView.findViewById(R.id.tvDlgNote);
-        LinearLayout layoutDlgExpenseDetails = dialogView.findViewById(R.id.layoutDlgExpenseDetails);
-        TextView tvDlgLinkedSource = dialogView.findViewById(R.id.tvDlgLinkedSource);
+        TextView tvDlgSource = dialogView.findViewById(R.id.tvDlgSource);
         TextView tvDlgSourceBalance = dialogView.findViewById(R.id.tvDlgSourceBalance);
         Button btnDlgClose = dialogView.findViewById(R.id.btnDlgClose);
 
@@ -104,22 +102,18 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         tvDlgNote.setText(item.getNote() != null && !item.getNote().isEmpty() ? item.getNote() : "No notes recorded.");
 
         String formattedAmt = String.format(Locale.US, "%.2f", item.getAmount());
-
         if (item.isIncome()) {
             tvDlgType.setText("INCOME TRANSACTION RECORD");
             tvDlgAmount.setText("+ ₹" + formattedAmt);
             tvDlgAmount.setTextColor(ContextCompat.getColor(context, R.color.income_green));
-            layoutDlgExpenseDetails.setVisibility(View.GONE);
         } else {
             tvDlgType.setText("EXPENSE TRANSACTION RECORD");
             tvDlgAmount.setText("- ₹" + formattedAmt);
             tvDlgAmount.setTextColor(ContextCompat.getColor(context, R.color.expense_red));
-            layoutDlgExpenseDetails.setVisibility(View.VISIBLE);
-            tvDlgLinkedSource.setText(item.getLinkedSourceName());
-            
-            String formattedSourceBal = String.format(Locale.US, "%.2f", item.getLinkedSourceAvailableBalance());
-            tvDlgSourceBalance.setText("₹" + formattedSourceBal);
         }
+
+        tvDlgSource.setText(item.getSourceName() != null ? item.getSourceName() : "General Account");
+        tvDlgSourceBalance.setText("₹" + String.format(Locale.US, "%.2f", item.getSourceAvailableBalance()));
 
         btnDlgClose.setOnClickListener(v -> dialog.dismiss());
         if (dialog.getWindow() != null) {
@@ -132,11 +126,11 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     public int getItemCount() { return transactionList.size(); }
 
     static class TransactionViewHolder extends RecyclerView.ViewHolder {
-        TextView tvRowTitle, tvRowDate, tvRowAmount;
+        TextView tvRowTitle, tvRowSubtitle, tvRowAmount;
         public TransactionViewHolder(@NonNull View itemView) {
             super(itemView);
             tvRowTitle = itemView.findViewById(R.id.tvRowTitle);
-            tvRowDate = itemView.findViewById(R.id.tvRowDate);
+            tvRowSubtitle = itemView.findViewById(R.id.tvRowSubtitle);
             tvRowAmount = itemView.findViewById(R.id.tvRowAmount);
         }
     }
