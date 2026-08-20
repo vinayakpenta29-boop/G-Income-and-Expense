@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -61,8 +62,10 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             holder.tvRowAmount.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.expense_red));
         }
 
+        // Tap row to open details pop-up
         holder.itemView.setOnClickListener(v -> showDetailsPopUp(v.getContext(), item));
 
+        // Long press also opens options
         holder.itemView.setOnLongClickListener(v -> {
             if (longClickListener != null) {
                 PopupMenu popup = new PopupMenu(v.getContext(), holder.tvRowAmount);
@@ -96,6 +99,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         TextView tvDlgSource = dialogView.findViewById(R.id.tvDlgSource);
         TextView tvDlgSourceBalance = dialogView.findViewById(R.id.tvDlgSourceBalance);
         Button btnDlgClose = dialogView.findViewById(R.id.btnDlgClose);
+        ImageButton btnDlgEdit = dialogView.findViewById(R.id.btnDlgEdit);
 
         tvDlgTitle.setText(item.getTitle());
         tvDlgDate.setText("Date Logged: " + item.getDate());
@@ -114,6 +118,25 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
         tvDlgSource.setText(item.getSourceName() != null ? item.getSourceName() : "General Account");
         tvDlgSourceBalance.setText("₹" + String.format(Locale.US, "%.2f", item.getSourceAvailableBalance()));
+
+        // Pencil Edit Button Click Listener -> Shows Edit/Delete Menu
+        btnDlgEdit.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(context, btnDlgEdit);
+            popup.getMenu().add("Edit Transaction");
+            popup.getMenu().add("Delete Transaction");
+            popup.setOnMenuItemClickListener(menuItem -> {
+                dialog.dismiss();
+                if (longClickListener != null) {
+                    if (menuItem.getTitle().equals("Edit Transaction")) {
+                        longClickListener.onEditSelected(item);
+                    } else if (menuItem.getTitle().equals("Delete Transaction")) {
+                        longClickListener.onDeleteSelected(item);
+                    }
+                }
+                return true;
+            });
+            popup.show();
+        });
 
         btnDlgClose.setOnClickListener(v -> dialog.dismiss());
         if (dialog.getWindow() != null) {
