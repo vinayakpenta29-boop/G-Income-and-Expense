@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        // Observers
+        // Room Observers
         dao.getAllSources().observe(this, sources -> {
             currentSources = sources;
             populateAccountSourceSpinner();
@@ -185,7 +185,8 @@ public class MainActivity extends AppCompatActivity {
 
         TextView info = new TextView(this);
         info.setText("Available Sources (Click to delete):");
-        info.setTextSize(14sp);
+        // FIX: Replaced invalid '14sp' with numeric float '14'
+        info.setTextSize(14);
         info.setPadding(0, 0, 0, 10);
         container.addView(info);
 
@@ -428,7 +429,6 @@ public class MainActivity extends AppCompatActivity {
         tvTotalExpense.setText("₹" + String.format(Locale.US, "%.2f", totalExpense));
         tvNetBalance.setText("₹" + String.format(Locale.US, "%.2f", netBalance));
 
-        // Display individual source balances below the Net Balance
         if (currentSources.isEmpty()) {
             tvSourcesBreakdown.setText("Sources: No sources created yet.");
         } else {
