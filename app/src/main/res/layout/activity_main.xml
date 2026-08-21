@@ -6,15 +6,25 @@
     android:orientation="vertical"
     android:background="@color/window_background">
 
-    <!-- TOP APP BAR WITH 3-DOTS MENU -->
+    <!-- TOP APP BAR (#BE123C with White Bold Monospace Text) -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/window_background"
+        android:layout_height="56dp"
+        android:background="@color/brand_crimson"
         app:title="Expense Manager"
-        app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge"
-        app:titleTextColor="@color/text_dark"/>
+        app:titleTextColor="#FFFFFF"
+        app:menu="@menu/main_menu">
+        <TextView
+            android:id="@+id/tvToolbarTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Expense Manager"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:typeface="monospace"/>
+    </com.google.android.material.appbar.MaterialToolbar>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -25,15 +35,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="24dp"
-            android:paddingBottom="24dp">
+            android:padding="20dp">
 
             <!-- TIME PERIOD FILTER CONTAINER -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
+                app:cardCornerRadius="14dp"
                 app:cardElevation="0dp"
                 app:strokeColor="#E2E8F0"
                 app:strokeWidth="1dp"
@@ -57,8 +66,7 @@
                     <Spinner
                         android:id="@+id/spTimeFilter"
                         android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:backgroundTint="@color/brand_primary"/>
+                        android:layout_height="40dp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -66,7 +74,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="20dp"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="4dp"
                 app:cardBackgroundColor="@color/brand_primary"
@@ -76,7 +84,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="24dp">
+                    android:padding="22dp">
                     
                     <TextView 
                         android:layout_width="wrap_content" 
@@ -95,20 +103,32 @@
                         android:textColor="#FFFFFF" 
                         android:textSize="34sp" 
                         android:textStyle="bold"
+                        android:layout_marginBottom="16dp"
                         android:letterSpacing="-0.03"/>
 
-                    <!-- SOURCES AVAILABLE BALANCES UNDER NET BALANCE -->
-                    <TextView 
-                        android:id="@+id/tvSourcesBreakdown" 
-                        android:layout_width="match_parent" 
-                        android:layout_height="wrap_content" 
-                        android:text="Sources: Loading..." 
-                        android:textColor="#38BDF8" 
-                        android:textSize="13sp"
+                    <!-- SIDE-BY-SIDE CURVED SOURCE BALANCE CARDS -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ACCOUNT BALANCES"
+                        android:textColor="#94A3B8"
+                        android:textSize="10sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="4dp"
-                        android:layout_marginBottom="16dp"
-                        android:lineSpacingMultiplier="1.2"/>
+                        android:letterSpacing="0.08"
+                        android:layout_marginBottom="8dp"/>
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"
+                        android:layout_marginBottom="16dp">
+                        
+                        <LinearLayout
+                            android:id="@+id/layoutSourcesCards"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"/>
+                    </HorizontalScrollView>
 
                     <View 
                         android:layout_width="match_parent" 
@@ -128,7 +148,7 @@
                             android:layout_weight="1"
                             android:orientation="vertical">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Total Income" android:textColor="#A7F3D0" android:textSize="12sp"/>
-                            <TextView android:id="@+id/tvTotalIncome" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="₹0.00" android:textColor="#FFFFFF" android:textSize="17sp" android:textStyle="bold"/>
+                            <TextView android:id="@+id/tvTotalIncome" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="₹0.00" android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -137,7 +157,7 @@
                             android:layout_weight="1"
                             android:orientation="vertical">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Total Expenses" android:textColor="#FECDD3" android:textSize="12sp"/>
-                            <TextView android:id="@+id/tvTotalExpense" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="₹0.00" android:textColor="#FFFFFF" android:textSize="17sp" android:textStyle="bold"/>
+                            <TextView android:id="@+id/tvTotalExpense" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="₹0.00" android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold"/>
                         </LinearLayout>
                     </LinearLayout>
 
@@ -169,23 +189,24 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- DATE SELECTOR ACTION BUTTON -->
+            <!-- DATE SELECTOR BUTTON -->
             <Button
                 android:id="@+id/btnPickDate"
                 style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="match_parent"
-                android:layout_height="54dp"
+                android:layout_height="52dp"
                 android:text="Selected Date: Today"
                 android:textColor="@color/brand_primary"
                 app:backgroundTint="#E2E8F0"
-                android:layout_marginBottom="24dp"/>
+                app:cardCornerRadius="14dp"
+                android:layout_marginBottom="20dp"/>
 
-            <!-- MAIN TRANSACTION LEDGER CARD -->
+            <!-- LOG TRANSACTION CARD -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
                 app:strokeColor="#E2E8F0"
                 app:strokeWidth="1dp"
@@ -204,9 +225,8 @@
                         android:textColor="@color/text_dark"
                         android:textStyle="bold" 
                         android:textSize="16sp"
-                        android:layout_marginBottom="16dp"/>
+                        android:layout_marginBottom="14dp"/>
 
-                    <!-- Transaction Type Spinner -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
@@ -214,14 +234,13 @@
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
                         android:paddingHorizontal="12dp"
-                        android:layout_marginBottom="16dp">
+                        android:layout_marginBottom="12dp">
                         <Spinner
                             android:id="@+id/spTransactionType"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"/>
                     </LinearLayout>
 
-                    <!-- Amount Box -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/inputLayoutAmount"
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
@@ -232,7 +251,7 @@
                         android:visibility="gone"
                         app:boxCornerRadiusTopStart="12dp" app:boxCornerRadiusTopEnd="12dp"
                         app:boxCornerRadiusBottomStart="12dp" app:boxCornerRadiusBottomEnd="12dp"
-                        app:boxStrokeColor="@color/brand_primary">
+                        app:boxStrokeColor="@color/brand_crimson">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etAmount"
                             android:layout_width="match_parent"
@@ -241,18 +260,17 @@
                             android:inputType="numberDecimal"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Title/Category Input Box -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/inputLayoutTitle"
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Category / Source (e.g. Salary, Food)"
+                        android:hint="Expense Category (e.g. Food)"
                         android:layout_marginBottom="12dp"
                         android:visibility="gone"
                         app:boxCornerRadiusTopStart="12dp" app:boxCornerRadiusTopEnd="12dp"
                         app:boxCornerRadiusBottomStart="12dp" app:boxCornerRadiusBottomEnd="12dp"
-                        app:boxStrokeColor="@color/brand_primary">
+                        app:boxStrokeColor="@color/brand_crimson">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etTitleInput"
                             android:layout_width="match_parent"
@@ -261,7 +279,6 @@
                             android:inputType="text"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Unified Account Source Selection Spinner (Bank, Cash, etc.) -->
                     <LinearLayout
                         android:id="@+id/layoutSourceSelection"
                         android:layout_width="match_parent"
@@ -291,7 +308,6 @@
                         </LinearLayout>
                     </LinearLayout>
 
-                    <!-- Notes Input -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/inputLayoutNote"
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
@@ -302,7 +318,7 @@
                         android:visibility="gone"
                         app:boxCornerRadiusTopStart="12dp" app:boxCornerRadiusTopEnd="12dp"
                         app:boxCornerRadiusBottomStart="12dp" app:boxCornerRadiusBottomEnd="12dp"
-                        app:boxStrokeColor="@color/brand_primary">
+                        app:boxStrokeColor="@color/brand_crimson">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etNote"
                             android:layout_width="match_parent"
@@ -314,17 +330,18 @@
                     <Button 
                         android:id="@+id/btnSaveTransaction" 
                         android:layout_width="match_parent" 
-                        android:layout_height="54dp" 
+                        android:layout_height="52dp" 
                         android:text="Save Transaction" 
                         android:textColor="#FFFFFF"
                         android:textSize="15sp"
                         android:textStyle="bold"
-                        app:backgroundTint="@color/brand_primary"
+                        app:backgroundTint="@color/brand_crimson"
+                        app:cardCornerRadius="12dp"
                         android:visibility="gone"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- TRANSACTION HISTORY LIST -->
+            <!-- TRANSACTION HISTORY -->
             <TextView 
                 android:layout_width="wrap_content" 
                 android:layout_height="wrap_content" 
@@ -337,7 +354,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
                 app:strokeColor="#E2E8F0"
                 app:strokeWidth="1dp"
