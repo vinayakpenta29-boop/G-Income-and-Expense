@@ -1,12 +1,18 @@
 package com.example.expensemanager.ui;
 
 import android.app.DatePickerDialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.expensemanager.R;
@@ -17,6 +23,7 @@ import com.example.expensemanager.data.Income;
 import com.example.expensemanager.data.TransactionItem;
 import com.example.expensemanager.data.ExpenseManagerDao;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -24,7 +31,8 @@ import java.util.*;
 public class MainActivity extends AppCompatActivity {
 
     private ExpenseManagerDao dao;
-    private TextView tvTotalIncome, tvTotalExpense, tvNetBalance, tvCategoryBreakdown, tvSourcesBreakdown;
+    private TextView tvTotalIncome, tvTotalExpense, tvNetBalance, tvCategoryBreakdown;
+    private LinearLayout layoutSourcesCards;
     private EditText etAmount, etTitleInput, etNote;
     private Spinner spTransactionType, spAccountSource, spTimeFilter;
     private LinearLayout layoutSourceSelection;
@@ -44,20 +52,28 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Configure Status Bar (#980F30 with White Icons)
+        getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.status_bar_crimson));
+        WindowInsetsControllerCompat windowController = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        windowController.setAppearanceLightStatusBars(false);
+
         setContentView(R.layout.activity_main);
 
         dao = AppDatabase.getDatabase(this).expenseManagerDao();
 
-        // Bind Toolbar & 3-Dots Menu
+        // Toolbar Configuration
         topAppBar = findViewById(R.id.topAppBar);
-        topAppBar.inflateMenu(R.menu.main_menu);
         topAppBar.setOnMenuItemClickListener(this::onToolbarMenuItemClicked);
+        if (topAppBar.getOverflowIcon() != null) {
+            topAppBar.getOverflowIcon().setTint(Color.WHITE);
+        }
 
         // Bind Views
         tvTotalIncome = findViewById(R.id.tvTotalIncome);
         tvTotalExpense = findViewById(R.id.tvTotalExpense);
         tvNetBalance = findViewById(R.id.tvNetBalance);
-        tvSourcesBreakdown = findViewById(R.id.tvSourcesBreakdown);
+        layoutSourcesCards = findViewById(R.id.layoutSourcesCards);
         tvCategoryBreakdown = findViewById(R.id.tvCategoryBreakdown);
         
         spTransactionType = findViewById(R.id.spTransactionType);
@@ -126,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
                 } else if (selectedType.equals("Expense")) {
                     findViewById(R.id.inputLayoutAmount).setVisibility(View.VISIBLE);
                     findViewById(R.id.inputLayoutTitle).setVisibility(View.VISIBLE);
-                    ((com.google.android.material.textfield.TextInputLayout)findViewById(R.id.inputLayoutTitle)).setHint("Expense Category (e.g. Food)");
+                    ((TextInputLayout)findViewById(R.id.inputLayoutTitle)).setHint("Expense Category (e.g. Food)");
                     layoutSourceSelection.setVisibility(View.VISIBLE);
                     findViewById(R.id.inputLayoutNote).setVisibility(View.VISIBLE);
                     btnSaveTransaction.setVisibility(View.VISIBLE);
@@ -205,6 +221,8 @@ public class MainActivity extends AppCompatActivity {
 
         Button btnAdd = new Button(this);
         btnAdd.setText("+ Add New Source");
+        btnAdd.setBackgroundColor(ContextCompat.getColor(this, R.color.brand_crimson));
+        btnAdd.setTextColor(Color.WHITE);
         btnAdd.setOnClickListener(v -> showAddNewSourceDialog());
         container.addView(btnAdd);
 
@@ -318,39 +336,33 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Transaction logged successfully!", Toast.LENGTH_SHORT).show();
     }
 
-    // UPDATED: Added Source Selection Dropdown Spinner in Edit Dialog
+    // PREMIUM CURVED CARD EDIT DIALOG
     private void showEditTransactionDialog(TransactionItem item) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(item.isIncome() ? "Edit Income Transaction" : "Edit Expense Transaction");
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_edit_transaction, null);
+        builder.setView(dialogView);
+        AlertDialog dialog = builder.create();
 
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(40, 20, 40, 20);
+        TextView tvEditDialogHeader = dialogView.findViewById(R.id.tvEditDialogHeader);
+        EditText etEditAmount = dialogView.findViewById(R.id.etEditAmount);
+        TextInputLayout layoutEditCategory = dialogView.findViewById(R.id.layoutEditCategory);
+        EditText etEditCategory = dialogView.findViewById(R.id.etEditCategory);
+        Spinner spEditAccountSource = dialogView.findViewById(R.id.spEditAccountSource);
+        EditText etEditNote = dialogView.findViewById(R.id.etEditNote);
+        Button btnCancelEdit = dialogView.findViewById(R.id.btnCancelEdit);
+        Button btnSaveEdit = dialogView.findViewById(R.id.btnSaveEdit);
 
-        // Amount Input
-        final EditText inputAmount = new EditText(this);
-        inputAmount.setHint("Amount (₹)");
-        inputAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        inputAmount.setText(String.format(Locale.US, "%.2f", item.getAmount()));
-        layout.addView(inputAmount);
+        tvEditDialogHeader.setText(item.isIncome() ? "EDIT INCOME RECORD" : "EDIT EXPENSE RECORD");
+        etEditAmount.setText(String.format(Locale.US, "%.2f", item.getAmount()));
+        etEditNote.setText(item.getNote() != null ? item.getNote() : "");
 
-        // Expense Category Input (Only for Expenses)
-        final EditText inputTitle = new EditText(this);
-        if (!item.isIncome()) {
-            inputTitle.setHint("Expense Category (e.g. Food)");
-            inputTitle.setText(item.getTitle());
-            layout.addView(inputTitle);
+        if (item.isIncome()) {
+            layoutEditCategory.setVisibility(View.GONE);
+        } else {
+            layoutEditCategory.setVisibility(View.VISIBLE);
+            etEditCategory.setText(item.getTitle());
         }
 
-        // Account Source Label
-        TextView tvSourceLabel = new TextView(this);
-        tvSourceLabel.setText("Account / Source:");
-        tvSourceLabel.setTextSize(13);
-        tvSourceLabel.setPadding(0, 16, 0, 8);
-        layout.addView(tvSourceLabel);
-
-        // Account Source Spinner
-        final Spinner spEditSource = new Spinner(this);
         List<String> sourceNames = new ArrayList<>();
         int selectedIndex = 0;
         for (int i = 0; i < currentSources.size(); i++) {
@@ -361,28 +373,21 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         ArrayAdapter<String> sourceAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, sourceNames);
-        spEditSource.setAdapter(sourceAdapter);
+        spEditAccountSource.setAdapter(sourceAdapter);
         if (!sourceNames.isEmpty()) {
-            spEditSource.setSelection(selectedIndex);
+            spEditAccountSource.setSelection(selectedIndex);
         }
-        layout.addView(spEditSource);
 
-        // Note Input
-        final EditText inputNote = new EditText(this);
-        inputNote.setHint("Note / Description (Optional)");
-        inputNote.setText(item.getNote() != null ? item.getNote() : "");
-        layout.addView(inputNote);
+        btnCancelEdit.setOnClickListener(v -> dialog.dismiss());
 
-        builder.setView(layout);
-
-        builder.setPositiveButton("Save", (dialog, which) -> {
-            String amtStr = inputAmount.getText().toString().trim();
+        btnSaveEdit.setOnClickListener(v -> {
+            String amtStr = etEditAmount.getText().toString().trim();
             if (amtStr.isEmpty()) return;
 
             double amount = Double.parseDouble(amtStr);
-            String note = inputNote.getText().toString().trim();
+            String note = etEditNote.getText().toString().trim();
 
-            AccountSource selectedSource = currentSources.isEmpty() ? null : currentSources.get(spEditSource.getSelectedItemPosition());
+            AccountSource selectedSource = currentSources.isEmpty() ? null : currentSources.get(spEditAccountSource.getSelectedItemPosition());
             Long newSourceId = selectedSource != null ? selectedSource.id : item.getSourceId();
             String newSourceName = selectedSource != null ? selectedSource.name : item.getSourceName();
 
@@ -393,17 +398,21 @@ public class MainActivity extends AppCompatActivity {
                     inc.id = item.getId();
                     dao.updateIncome(inc);
                 } else {
-                    String title = inputTitle.getText().toString().trim();
+                    String title = etEditCategory.getText().toString().trim();
                     if (title.isEmpty()) title = item.getTitle();
                     Expense exp = new Expense(amount, title, newSourceId, newSourceName, item.getDate(), note);
                     exp.id = item.getId();
                     dao.updateExpense(exp);
                 }
             });
-            Toast.makeText(this, "Updated!", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+            Toast.makeText(MainActivity.this, "Updated!", Toast.LENGTH_SHORT).show();
         });
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+        dialog.show();
     }
 
     private void showDeleteConfirmationDialog(TransactionItem item) {
@@ -475,19 +484,17 @@ public class MainActivity extends AppCompatActivity {
         tvTotalExpense.setText("₹" + String.format(Locale.US, "%.2f", totalExpense));
         tvNetBalance.setText("₹" + String.format(Locale.US, "%.2f", netBalance));
 
-        if (currentSources.isEmpty()) {
-            tvSourcesBreakdown.setText("Sources: No sources created yet.");
-        } else {
-            StringBuilder sb = new StringBuilder("Sources:  ");
-            for (AccountSource s : currentSources) {
-                double b = sourceBalances.getOrDefault(s.id, 0.0);
-                sb.append(s.name).append(": ₹").append(String.format(Locale.US, "%.2f", b)).append("   |   ");
-            }
-            String result = sb.toString();
-            if (result.endsWith("   |   ")) {
-                result = result.substring(0, result.length() - 7);
-            }
-            tvSourcesBreakdown.setText(result);
+        // DYNAMICALLY POPULATE SIDE-BY-SIDE CURVED SOURCE CARDS
+        layoutSourcesCards.removeAllViews();
+        for (AccountSource s : currentSources) {
+            View cardView = LayoutInflater.from(this).inflate(R.layout.item_source_card, layoutSourcesCards, false);
+            TextView tvName = cardView.findViewById(R.id.tvSourceCardName);
+            TextView tvBal = cardView.findViewById(R.id.tvSourceCardBalance);
+            
+            tvName.setText(s.name);
+            double b = sourceBalances.getOrDefault(s.id, 0.0);
+            tvBal.setText("₹" + String.format(Locale.US, "%.2f", b));
+            layoutSourcesCards.addView(cardView);
         }
 
         if (categoryMap.isEmpty()) {
