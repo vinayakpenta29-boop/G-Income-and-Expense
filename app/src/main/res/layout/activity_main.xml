@@ -6,15 +6,14 @@
     android:orientation="vertical"
     android:background="@color/window_background">
 
-    <!-- TOP APP BAR (#BE123C with White Bold Monospace Text) -->
+    <!-- TOP TOOLBAR (Only Monospace Text Displayed) -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="@color/brand_crimson"
-        app:title="Expense Manager"
-        app:titleTextColor="#FFFFFF"
         app:menu="@menu/main_menu">
+        
         <TextView
             android:id="@+id/tvToolbarTitle"
             android:layout_width="wrap_content"
@@ -70,14 +69,14 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- LUXURY DASHBOARD SUMMARY CARD -->
+            <!-- MATCHING VELVET BURGUNDY DASHBOARD CARD -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
-                app:cardCornerRadius="20dp"
+                app:cardCornerRadius="22dp"
                 app:cardElevation="4dp"
-                app:cardBackgroundColor="@color/brand_primary"
+                app:cardBackgroundColor="@color/card_dashboard_bg"
                 app:strokeWidth="0dp">
                 
                 <LinearLayout
@@ -90,7 +89,7 @@
                         android:layout_width="wrap_content" 
                         android:layout_height="wrap_content" 
                         android:text="NET BALANCE" 
-                        android:textColor="#94A3B8" 
+                        android:textColor="#FECDD3" 
                         android:textSize="11sp" 
                         android:textStyle="bold"
                         android:letterSpacing="0.1"/>
@@ -111,7 +110,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="ACCOUNT BALANCES"
-                        android:textColor="#94A3B8"
+                        android:textColor="#FECDD3"
                         android:textSize="10sp"
                         android:textStyle="bold"
                         android:letterSpacing="0.08"
@@ -133,7 +132,7 @@
                     <View 
                         android:layout_width="match_parent" 
                         android:layout_height="1dp" 
-                        android:background="#334155" 
+                        android:background="@color/dashboard_divider" 
                         android:layout_marginBottom="16dp"/>
 
                     <LinearLayout
@@ -164,7 +163,7 @@
                     <View 
                         android:layout_width="match_parent" 
                         android:layout_height="1dp" 
-                        android:background="#334155" 
+                        android:background="@color/dashboard_divider" 
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="12dp"/>
                     
@@ -172,7 +171,7 @@
                         android:layout_width="wrap_content" 
                         android:layout_height="wrap_content" 
                         android:text="SPENDING BREAKDOWN" 
-                        android:textColor="#94A3B8" 
+                        android:textColor="#FECDD3" 
                         android:textSize="10sp" 
                         android:textStyle="bold"
                         android:letterSpacing="0.05"
@@ -183,7 +182,7 @@
                         android:layout_width="match_parent" 
                         android:layout_height="wrap_content" 
                         android:text="No expenses to categorize yet." 
-                        android:textColor="#E2E8F0" 
+                        android:textColor="#FEE2E2" 
                         android:textSize="13sp"
                         android:lineSpacingMultiplier="1.2"/>
                 </LinearLayout>
