@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Brand & Bar Colors -->
+    <!-- Brand & Top Bar Colors -->
     <color name="brand_crimson">#BE123C</color>         <!-- Top Bar Ruby Crimson -->
     <color name="status_bar_crimson">#980F30</color>    <!-- Status Bar Dark Crimson -->
     <color name="brand_primary">#0F172A</color>        <!-- Dark Slate Navy -->
-    <color name="brand_secondary">#475569</color>      <!-- Muted Cool Slate -->
-    <color name="window_background">#F8FAFC</color>    <!-- Clean Off-White Surface -->
+    <color name="brand_secondary">#475569</color>      <!-- Muted Slate -->
+    <color name="window_background">#F8FAFC</color>    <!-- Surface Off-White -->
     
+    <!-- Matching Main Balance Box Velvet Palette -->
+    <color name="card_dashboard_bg">#580B1E</color>     <!-- Deep Velvet Wine -->
+    <color name="card_dashboard_sub">#78102B</color>    <!-- Matching Inner Card Tone -->
+    <color name="card_dashboard_border">#981637</color> <!-- Inner Card Border Accent -->
+    <color name="dashboard_divider">#881337</color>     <!-- Divider Line Accent -->
+
     <!-- Transaction States -->
     <color name="income_green">#10B981</color>         <!-- Emerald Green -->
     <color name="expense_red">#BE123C</color>          <!-- Ruby Crimson -->
     <color name="card_bg_surface">#FFFFFF</color>      <!-- White Surface -->
-    <color name="source_card_bg">#1E293B</color>       <!-- Dark Card Sub-Surface -->
     
     <!-- Text Colors -->
     <color name="text_dark">#0F172A</color>            <!-- Ink Black -->
