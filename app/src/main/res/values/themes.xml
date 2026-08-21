@@ -1,8 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.ExpenseManager" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Status Bar Color & White Icons -->
         <item name="android:statusBarColor">@color/status_bar_crimson</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="colorPrimary">@color/brand_crimson</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 </resources>
